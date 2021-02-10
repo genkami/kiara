@@ -25,9 +25,12 @@ type Broker struct {
 
 // NewBroker creates a new Broker.
 func NewBroker() *Broker {
+	opts := defaultBrokerOptions()
 	b := &Broker{
 		adapters: newAdapterSet(),
-		opts:     defaultBrokerOptions(),
+		messages: make(chan *types.Message, opts.messagesChSize),
+		opts:     opts,
+		done:     make(chan struct{}),
 	}
 	go b.run()
 	return b
@@ -77,9 +80,7 @@ func (b *Broker) Close() {
 
 // brokerOptions is a configuration of Broker.
 type brokerOptions struct {
-	messagesChSize  int
-	publishChSize   int
-	deliveredChSize int
+	messagesChSize int
 }
 
 func defaultBrokerOptions() brokerOptions {
