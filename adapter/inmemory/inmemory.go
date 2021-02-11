@@ -26,6 +26,7 @@ type Broker struct {
 // NewBroker creates a new Broker.
 func NewBroker() *Broker {
 	opts := defaultBrokerOptions()
+	// TODO: configure broker
 	b := &Broker{
 		adapters: newAdapterSet(),
 		messages: make(chan *types.Message, opts.messagesChSize),
@@ -131,6 +132,7 @@ type Adapter struct {
 
 func NewAdapter(broker *Broker) *Adapter {
 	opts := newAdapterOptions()
+	// TODO: configure adapter
 	a := &Adapter{
 		broker:    broker,
 		topics:    newTopicSet(),

@@ -35,6 +35,7 @@ type PubSub struct {
 // NewPubSub createsa new PubSub.
 func NewPubSub(adapter types.Adapter) *PubSub {
 	opts := defaultOptions()
+	// TODO: configure pubsub
 	p := &PubSub{
 		adapter: adapter,
 		opts:    opts,
