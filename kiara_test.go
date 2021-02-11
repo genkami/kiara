@@ -40,7 +40,7 @@ var _ = Describe("Kiara", func() {
 		Context("when a topic is subscribed", func() {
 			It("sends a message to the subscriber", func() {
 				topic := "room:123"
-				ch := make(chan interface{}, defaultChSize)
+				ch := make(chan int, defaultChSize)
 				sub, err := pubsub.Subscribe(topic, ch)
 				Expect(err).NotTo(HaveOccurred())
 				defer sub.Unsubscribe()
@@ -50,8 +50,7 @@ var _ = Describe("Kiara", func() {
 				err = pubsub.Publish(ctx, topic, sent)
 				Expect(err).NotTo(HaveOccurred())
 				select {
-				case receivedAny := <-ch:
-					received := receivedAny.(int)
+				case received := <-ch:
 					Expect(received).To(Equal(sent))
 				case <-time.After(timeoutExpectedNotToExceed):
 					Fail("timeout")
@@ -63,7 +62,7 @@ var _ = Describe("Kiara", func() {
 			It("does not send any message to the subscriber", func() {
 				topic := "room:123"
 				anotherTopic := "room:321"
-				ch := make(chan interface{}, defaultChSize)
+				ch := make(chan int, defaultChSize)
 				sub, err := pubsub.Subscribe(anotherTopic, ch)
 				Expect(err).NotTo(HaveOccurred())
 				defer sub.Unsubscribe()
@@ -85,7 +84,7 @@ var _ = Describe("Kiara", func() {
 			It("stops sending messages to the subscriber", func() {
 				topic := "room:123"
 				unsubscribed := false
-				ch := make(chan interface{}, defaultChSize)
+				ch := make(chan int, defaultChSize)
 				sub, err := pubsub.Subscribe(topic, ch)
 				Expect(err).NotTo(HaveOccurred())
 				defer func() {
@@ -100,8 +99,7 @@ var _ = Describe("Kiara", func() {
 				err = pubsub.Publish(ctx, topic, sent)
 				Expect(err).NotTo(HaveOccurred())
 				select {
-				case receivedAny := <-ch:
-					received := receivedAny.(int)
+				case received := <-ch:
 					Expect(received).To(Equal(sent))
 				case <-time.After(timeoutExpectedNotToExceed):
 					Fail("timeout")
@@ -130,9 +128,9 @@ var _ = Describe("Kiara", func() {
 				topic := "room:123"
 
 				n := 3
-				chs := make([]chan interface{}, 0, n)
+				chs := make([]chan int, 0, n)
 				for i := 0; i < n; i++ {
-					ch := make(chan interface{}, defaultChSize)
+					ch := make(chan int, defaultChSize)
 					sub, err := pubsub.Subscribe(topic, ch)
 					Expect(err).NotTo(HaveOccurred())
 					defer sub.Unsubscribe()
@@ -146,8 +144,7 @@ var _ = Describe("Kiara", func() {
 				Expect(err).NotTo(HaveOccurred())
 				for i, ch := range chs {
 					select {
-					case receivedAny := <-ch:
-						received := receivedAny.(int)
+					case received := <-ch:
 						Expect(received).To(Equal(sent))
 					case <-time.After(timeoutExpectedNotToExceed):
 						Fail(fmt.Sprintf("%d: timeout", i))
@@ -161,7 +158,7 @@ var _ = Describe("Kiara", func() {
 				topic := "room:123"
 
 				subAUnsubscribed := false
-				chA := make(chan interface{}, defaultChSize)
+				chA := make(chan int, defaultChSize)
 				subA, err := pubsub.Subscribe(topic, chA)
 				Expect(err).NotTo(HaveOccurred())
 				defer func() {
@@ -170,7 +167,7 @@ var _ = Describe("Kiara", func() {
 					}
 				}()
 
-				chB := make(chan interface{}, defaultChSize)
+				chB := make(chan int, defaultChSize)
 				subB, err := pubsub.Subscribe(topic, chB)
 				Expect(err).NotTo(HaveOccurred())
 				defer subB.Unsubscribe()
@@ -182,10 +179,9 @@ var _ = Describe("Kiara", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				// ensure that all `ch`s are subscribing to the topic
-				for i, ch := range []chan interface{}{chA, chB} {
+				for i, ch := range []chan int{chA, chB} {
 					select {
-					case receivedAny := <-ch:
-						received := receivedAny.(int)
+					case received := <-ch:
 						Expect(received).To(Equal(sent))
 					case <-time.After(timeoutExpectedNotToExceed):
 						Fail(fmt.Sprintf("%d: timeout", i))
@@ -210,8 +206,7 @@ var _ = Describe("Kiara", func() {
 				}
 
 				select {
-				case receivedAny := <-chB:
-					received := receivedAny.(int)
+				case received := <-chB:
 					Expect(received).To(Equal(sent))
 				case <-time.After(timeoutExpectedNotToExceed):
 					Fail("timeout")

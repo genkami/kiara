@@ -79,7 +79,7 @@ func (p *PubSub) deliver(msg *types.Message) {
 	}
 	channels = channels.Copy()
 	p.state.lock.RUnlock()
-	channels.ForEach(func(ch chan<- interface{}) {
+	channels.ForEach(func(ch interface{}) {
 		p.deliverTo(ch, msg.Payload)
 	})
 }
@@ -87,9 +87,10 @@ func (p *PubSub) deliver(msg *types.Message) {
 // deliverTo parses a message and delivers it to the given channel.
 // We do not share the parsed result with all channels that want the result in order
 // to prevent the result from accidentally being accessed concurrently.
-func (p *PubSub) deliverTo(ch chan<- interface{}, payload []byte) {
+func (p *PubSub) deliverTo(channel interface{}, payload []byte) {
 	// TODO: support all types
 	var data int
+	ch := channel.(chan int)
 	err := p.codec.Unmarshal(payload, &data)
 	if err != nil {
 		select {
@@ -139,7 +140,7 @@ func (p *PubSub) Errors() <-chan error {
 // sent to the given channel.
 // A `channel` must be the type of `chan<- T` where `T` is any type that can be
 // `Unmarshal`ed by the codec of the `PubSub`.
-func (p *PubSub) Subscribe(topic string, channel chan<- interface{}) (*Subscription, error) {
+func (p *PubSub) Subscribe(topic string, channel interface{}) (*Subscription, error) {
 	p.state.lock.Lock()
 	defer p.state.lock.Unlock()
 	alreadySubscribed := false
@@ -168,7 +169,7 @@ func (p *PubSub) Subscribe(topic string, channel chan<- interface{}) (*Subscript
 	}, nil
 }
 
-func (p *PubSub) unsubscribe(topic string, channel chan<- interface{}) error {
+func (p *PubSub) unsubscribe(topic string, channel interface{}) error {
 	p.state.lock.Lock()
 	defer p.state.lock.Unlock()
 	channels, ok := p.state.subs[topic]
@@ -206,7 +207,7 @@ type pubSubState struct {
 // Subscription binds a channel to specific topic.
 type Subscription struct {
 	topic   string
-	channel chan<- interface{}
+	channel interface{} // guaranteed to be a channel
 	pubSub  *PubSub
 }
 
@@ -217,17 +218,18 @@ func (s *Subscription) Unsubscribe() error {
 }
 
 // subscriptionSet is a set of subscriptions that PubSub should deliver messages to.
-type subscriptionSet map[chan<- interface{}]struct{}
+// The key is guaranteed to be channels.
+type subscriptionSet map[interface{}]struct{}
 
 func newSubscriptionSet() subscriptionSet {
-	return subscriptionSet(map[chan<- interface{}]struct{}{})
+	return subscriptionSet(map[interface{}]struct{}{})
 }
 
-func (set subscriptionSet) Add(ch chan<- interface{}) {
+func (set subscriptionSet) Add(ch interface{}) {
 	set[ch] = struct{}{}
 }
 
-func (set subscriptionSet) Delete(ch chan<- interface{}) {
+func (set subscriptionSet) Delete(ch interface{}) {
 	delete(set, ch)
 }
 
@@ -239,7 +241,7 @@ func (set subscriptionSet) Copy() subscriptionSet {
 	return clone
 }
 
-func (set subscriptionSet) ForEach(fn func(chan<- interface{})) {
+func (set subscriptionSet) ForEach(fn func(interface{})) {
 	for ch := range set {
 		fn(ch)
 	}
