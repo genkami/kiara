@@ -32,3 +32,12 @@ type Adapter interface {
 	// Close stops the adapter and releases resources that an adapter has.
 	Close()
 }
+
+// Codec converts an arbitrary object into a byte slice.
+type Codec interface {
+	// Marshal converts `v` into a byte slice.
+	Marshal(v interface{}) ([]byte, error)
+
+	// Unmarshal parses src into `v`.
+	Unmarshal(src []byte, v interface{}) error
+}

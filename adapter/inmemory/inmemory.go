@@ -111,7 +111,7 @@ func (set adapterSet) Has(a *Adapter) bool {
 }
 
 func (set adapterSet) ForEach(fn func(*Adapter)) {
-	for a, _ := range set {
+	for a := range set {
 		fn(a)
 	}
 }
