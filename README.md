@@ -1,5 +1,8 @@
 # Kiara
 
+![ci status](https://github.com/genkami/kiara/workflows/Test/badge.svg)
+[![Go Reference](https://pkg.go.dev/badge/github.com/genkami/kiara.svg)](https://pkg.go.dev/github.com/genkami/kiara)
+
 ![phoenix](./doc/img/phoenix.png)
 
 Kiara is a Go equivalent of Phoenix PubSub that makes it easy for Go applications to communicate with each other.
