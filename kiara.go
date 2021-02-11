@@ -11,8 +11,14 @@ import (
 )
 
 var (
+	// This error is reported through PubSub.Errors() when a channel through which messages are sent is full.
 	ErrSlowConsumer = errors.New("consumer is too slow; message discarded")
-	ErrCancelled    = errors.New("cancelled")
+
+	// This error is returned when a given context is cancelled.
+	ErrCancelled = errors.New("cancelled")
+
+	// This error is returned when the second argument of PubSub.Subscribe() is not a channel or the direction of the channel is not <-.
+	ErrArgumentMustBeChannel = errors.New("argument must be a channel")
 )
 
 // PubSub provides a way to send and receive arbitrary data.
@@ -145,7 +151,14 @@ func (p *PubSub) Errors() <-chan error {
 // A `channel` must be the type of `chan<- T` where `T` is any type that can be
 // `Unmarshal`ed by the codec of the `PubSub`.
 func (p *PubSub) Subscribe(topic string, channel interface{}) (*Subscription, error) {
-	// TODO: return error when channel is not a channel or the direction of channel is not recvdir
+	chanType := reflect.TypeOf(channel)
+	if chanType.Kind() != reflect.Chan {
+		return nil, ErrArgumentMustBeChannel
+	}
+	if chanType.ChanDir()&reflect.SendDir == 0 {
+		return nil, ErrArgumentMustBeChannel
+	}
+
 	p.state.lock.Lock()
 	defer p.state.lock.Unlock()
 	alreadySubscribed := false

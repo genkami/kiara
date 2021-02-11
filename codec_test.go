@@ -19,7 +19,7 @@ func receiveMessage(channel interface{}) (interface{}, bool) {
 	if chanType.Kind() != reflect.Chan {
 		panic(fmt.Sprintf("expected channel but got %s", chanType))
 	}
-	if chanType.ChanDir()|reflect.RecvDir == 0 {
+	if chanType.ChanDir()&reflect.RecvDir == 0 {
 		panic(fmt.Sprintf("expected <-chan T but got %s", chanType))
 	}
 	timeAfter := time.After(timeoutExpectedNotToExceed)

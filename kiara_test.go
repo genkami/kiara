@@ -20,23 +20,59 @@ var (
 )
 
 var _ = Describe("Kiara", func() {
+	var (
+		broker *inmemory.Broker
+		pubsub *kiara.PubSub
+	)
+
+	BeforeEach(func() {
+		broker = inmemory.NewBroker()
+		adapter := inmemory.NewAdapter(broker)
+		pubsub = kiara.NewPubSub(adapter)
+	})
+
+	AfterEach(func() {
+		pubsub.Close()
+		broker.Close()
+	})
+
+	Describe("Subscribe", func() {
+		Context("when the second argument is `chan T`", func() {
+			It("can subscribe to the topic", func() {
+				var ch chan int = make(chan int, defaultChSize)
+				sub, err := pubsub.Subscribe("room:123", ch)
+				Expect(err).NotTo(HaveOccurred())
+				sub.Unsubscribe()
+			})
+		})
+
+		Context("when the second argument is `chan<- T`", func() {
+			It("can subscribe to the topic", func() {
+				var ch chan<- int = make(chan int, defaultChSize)
+				sub, err := pubsub.Subscribe("room:123", ch)
+				Expect(err).NotTo(HaveOccurred())
+				sub.Unsubscribe()
+			})
+		})
+
+		Context("when the second argument is `<-chan T`", func() {
+			It("returns an error", func() {
+				var ch <-chan int = make(chan int, defaultChSize)
+				_, err := pubsub.Subscribe("room:123", ch)
+				Expect(err).To(MatchError(kiara.ErrArgumentMustBeChannel))
+			})
+		})
+
+		Context("when the second argument is not a channel", func() {
+			It("returns an error", func() {
+				var ch []int = make([]int, defaultChSize)
+				_, err := pubsub.Subscribe("room:123", ch)
+				Expect(err).To(MatchError(kiara.ErrArgumentMustBeChannel))
+			})
+		})
+	})
+
 	Describe("Publish", func() {
-		var (
-			broker *inmemory.Broker
-			pubsub *kiara.PubSub
-		)
-
-		BeforeEach(func() {
-			broker = inmemory.NewBroker()
-			adapter := inmemory.NewAdapter(broker)
-			pubsub = kiara.NewPubSub(adapter)
-		})
-
-		AfterEach(func() {
-			pubsub.Close()
-			broker.Close()
-		})
-
 		Context("when a topic is subscribed", func() {
 			It("sends a message to the subscriber", func() {
 				topic := "room:123"
