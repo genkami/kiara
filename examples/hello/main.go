@@ -1,12 +1,3 @@
-# Kiara
-
-![phoenix](./doc/img/phoenix.png)
-
-Kiara is a Go equivalent of Phoenix PubSub that makes it easy for Go applications to communicate with each other.
-
-## Basic Usage (with Redis Backend)
-
-``` go
 package main
 
 import (
@@ -46,4 +37,3 @@ func main() {
 	sent := <-channel
 	fmt.Printf("%s: %s\n", sent.From, sent.Body)
 }
-```
