@@ -65,7 +65,110 @@ var _ = Describe("Codec", func() {
 
 	Context("when message is int", func() {
 		var sent int = 123
-		channel := make(chan int, 10)
+		channel := make(chan int, defaultChSize)
+		AssertMessageIsSent(sent, channel)
+	})
+
+	Context("when message is *int", func() {
+		var sent int = 123
+		channel := make(chan *int, defaultChSize)
+		AssertMessageIsSent(&sent, channel)
+	})
+
+	Context("when message is int8", func() {
+		var sent int8 = 123
+		channel := make(chan int8, defaultChSize)
+		AssertMessageIsSent(sent, channel)
+	})
+
+	Context("when message is uint", func() {
+		var sent uint = 123
+		channel := make(chan uint, defaultChSize)
+		AssertMessageIsSent(sent, channel)
+	})
+
+	Context("when message is uint8", func() {
+		var sent uint8 = 123
+		channel := make(chan uint8, defaultChSize)
+		AssertMessageIsSent(sent, channel)
+	})
+
+	Context("when message is float32", func() {
+		var sent float32 = 1.23
+		channel := make(chan float32, defaultChSize)
+		AssertMessageIsSent(sent, channel)
+	})
+
+	Context("when message is float64", func() {
+		var sent float64 = 1.23
+		channel := make(chan float64, defaultChSize)
+		AssertMessageIsSent(sent, channel)
+	})
+
+	Context("when message is string", func() {
+		var sent string = "hello"
+		channel := make(chan string, defaultChSize)
+		AssertMessageIsSent(sent, channel)
+	})
+
+	Context("when message is *string", func() {
+		var sent string = "hello"
+		channel := make(chan *string, defaultChSize)
+		AssertMessageIsSent(&sent, channel)
+	})
+
+	Context("when message is slice", func() {
+		var sent []string = []string{"hello", "world"}
+		channel := make(chan []string, defaultChSize)
+		AssertMessageIsSent(sent, channel)
+	})
+
+	Context("when message is pointer to slice", func() {
+		var sent []string = []string{"hello", "world"}
+		channel := make(chan *[]string, defaultChSize)
+		AssertMessageIsSent(&sent, channel)
+	})
+
+	Context("when message is array", func() {
+		var sent [3]int = [3]int{1, 2, 3}
+		channel := make(chan [3]int, defaultChSize)
+		AssertMessageIsSent(sent, channel)
+	})
+
+	Context("when message is pointer to array", func() {
+		var sent [3]int = [3]int{1, 2, 3}
+		channel := make(chan *[3]int, defaultChSize)
+		AssertMessageIsSent(&sent, channel)
+	})
+
+	Context("when message is defined type", func() {
+		var sent myInt = 123
+		channel := make(chan myInt, defaultChSize)
+		AssertMessageIsSent(sent, channel)
+	})
+
+	Context("when message is pointer to defined type", func() {
+		var sent myInt = 123
+		channel := make(chan *myInt, defaultChSize)
+		AssertMessageIsSent(&sent, channel)
+	})
+
+	Context("when message is struct", func() {
+		var sent myStruct = myStruct{ID: 123, Company: "KFP"}
+		channel := make(chan myStruct, defaultChSize)
+		AssertMessageIsSent(sent, channel)
+	})
+
+	Context("when message is pointer to struct", func() {
+		var sent *myStruct = &myStruct{ID: 123, Company: "KFP"}
+		channel := make(chan *myStruct, defaultChSize)
 		AssertMessageIsSent(sent, channel)
 	})
 })
+
+type myInt int
+
+type myStruct struct {
+	ID      int
+	Company string
+}
