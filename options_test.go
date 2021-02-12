@@ -59,4 +59,21 @@ var _ = Describe("Options", func() {
 			})
 		})
 	})
+
+	Describe("ErrorChannelSize", func() {
+		Context("when the option is not set", func() {
+			It("uses the default size", func() {
+				pubsub := newPubSub()
+				Expect(cap(pubsub.errorCh)).To(Equal(defaultErrorChannelSize))
+			})
+		})
+
+		Context("when the option is set", func() {
+			It("uses the given size", func() {
+				size := 445
+				pubsub := newPubSub(ErrorChannelSize(size))
+				Expect(cap(pubsub.errorCh)).To(Equal(size))
+			})
+		})
+	})
 })
