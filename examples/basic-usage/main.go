@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 
 	"github.com/genkami/kiara"
@@ -15,8 +16,12 @@ type Message struct {
 }
 
 func main() {
+	var redisAddr string
+	flag.StringVar(&redisAddr, "redis-addr", "localhost:6379", "Redis address")
+	flag.Parse()
+
 	var err error
-	redisClient := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
+	redisClient := redis.NewClient(&redis.Options{Addr: redisAddr})
 	pubsub := kiara.NewPubSub(adapter.NewAdapter(redisClient))
 	defer pubsub.Close()
 
