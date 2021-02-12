@@ -7,6 +7,10 @@
 
 Kiara is a Go equivalent of Phoenix PubSub that makes it easy for Go applications to communicate with each other.
 
+## Examples
+* [Basic Usage](./examples/basic-usage/README.md)
+* [Custom Codec (WATSON × Kiara)](./examples/custom-codec/README.md)
+
 ## Basic Usage (with Redis Backend)
 
 ``` go
@@ -79,8 +83,3 @@ func (_ *WatsonCodec) Unmarshal(src []byte, v interface{}) error {
 	return watson.Unmarshal(src, v)
 }
 ```
-
-
-## Examples
-* [Basic Usage](./examples/basic-usage/README.md)
-* [Custom Codec (WATSON × Kiara)](./examples/custom-codec/README.md)
