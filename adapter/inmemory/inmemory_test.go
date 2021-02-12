@@ -1,18 +1,11 @@
 package inmemory_test
 
 import (
-	"time"
-
 	. "github.com/onsi/ginkgo"
 
 	"github.com/genkami/kiara/adapter/inmemory"
 	"github.com/genkami/kiara/adapter/internal/commontest"
 	"github.com/genkami/kiara/types"
-)
-
-var (
-	timeout      = 1 * time.Second
-	shortTimeout = 10 * time.Millisecond
 )
 
 type env struct {
