@@ -50,3 +50,25 @@ func main() {
 	fmt.Printf("%s: %s\n", sent.From, sent.Body)
 }
 ```
+
+## Custom Codec
+You can implement your own codec by simple implementing `Marshal` and `Unmarshal`. For example, if you want to encode messages into [WATSON](https://github.com/genkami/watson), you have to implement WATSON codec like this:
+
+``` go
+import 	"github.com/genkami/watson"
+
+type WatsonCodec struct{}
+
+func (_ *WatsonCodec) Marshal(v interface{}) ([]byte, error) {
+	return watson.Marshal(v)
+}
+
+func (_ *WatsonCodec) Unmarshal(src []byte, v interface{}) error {
+	return watson.Unmarshal(src, v)
+}
+```
+
+
+## Examples
+* [Basic Usage](./examples/basic-usage/README.md)
+* [Custom Codec](./examples/custom-codec/README.md)
