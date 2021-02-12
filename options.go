@@ -32,6 +32,8 @@ func (f optionFunc) apply(opts *options) {
 }
 
 // WithCodec specifies a codec that PubSub uses to marshal and unmarshal messages.
+//
+// By default, messages are marshaled into gob format.
 func WithCodec(codec types.Codec) Option {
 	return optionFunc(func(opts *options) {
 		opts.codec = codec

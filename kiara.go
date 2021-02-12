@@ -156,8 +156,12 @@ func (p *PubSub) Errors() <-chan error {
 // Subscribe binds a channel to the given topic.
 // This means any messages that are `Publish`ed toghther with the same topic are
 // sent to the given channel.
+//
 // A `channel` must be the type of `chan<- T` where `T` is any type that can be
 // `Unmarshal`ed by the codec of the `PubSub`.
+//
+// It's ok to subscribe to one topic more than one times.
+// In this case, messages are broadcasted to all channels that are subscribing to the topic.
 func (p *PubSub) Subscribe(topic string, channel interface{}) (*Subscription, error) {
 	chanType := reflect.TypeOf(channel)
 	if chanType.Kind() != reflect.Chan {
