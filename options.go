@@ -1,7 +1,7 @@
 package kiara
 
 import (
-	"github.com/genkami/kiara/codec/msgpack"
+	"github.com/genkami/kiara/codec/gob"
 	"github.com/genkami/kiara/types"
 )
 
@@ -14,7 +14,7 @@ type options struct {
 func defaultOptions() options {
 	return options{
 		errorChSize: 10,
-		codec:       msgpack.Codec, // TODO: change this to gob
+		codec:       gob.Codec,
 	}
 }
 
