@@ -6,6 +6,7 @@ import (
 
 	"github.com/vmihailenco/msgpack/v5"
 
+	"github.com/genkami/kiara/codec/internal/commontest"
 	codec "github.com/genkami/kiara/codec/msgpack"
 )
 
@@ -38,4 +39,6 @@ var _ = Describe("Msgpack", func() {
 			Expect(&unmarshaled).To(Equal(data))
 		})
 	})
+
+	commontest.AssertCodecCanMarshalAndUnmarshalAlmostEverything(codec.Codec)
 })

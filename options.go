@@ -29,7 +29,7 @@ func (f optionFunc) apply(opts *options) {
 	f(opts)
 }
 
-func WithCustomCodec(codec types.Codec) Option {
+func WithCodec(codec types.Codec) Option {
 	return optionFunc(func(opts *options) {
 		opts.codec = codec
 	})
