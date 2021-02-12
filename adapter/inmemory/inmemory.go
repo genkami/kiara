@@ -26,7 +26,6 @@ type Broker struct {
 // NewBroker creates a new Broker.
 func NewBroker() *Broker {
 	opts := defaultBrokerOptions()
-	// TODO: configure broker
 	b := &Broker{
 		adapters: newAdapterSet(),
 		messages: make(chan *types.Message, opts.messagesChSize),
@@ -84,6 +83,7 @@ type brokerOptions struct {
 	messagesChSize int
 }
 
+// Currently we do not provide any methods to configure these parameters because no one wants to do this.
 func defaultBrokerOptions() brokerOptions {
 	return brokerOptions{
 		messagesChSize: 10,
@@ -131,8 +131,7 @@ type Adapter struct {
 }
 
 func NewAdapter(broker *Broker) *Adapter {
-	opts := newAdapterOptions()
-	// TODO: configure adapter
+	opts := defaultAdapterOptions()
 	a := &Adapter{
 		broker:    broker,
 		topics:    newTopicSet(),
@@ -217,7 +216,8 @@ type adapterOptions struct {
 	noticedChSize   int
 }
 
-func newAdapterOptions() adapterOptions {
+// Currently we do not provide any methods to configure these parameters because no one wants to do this.
+func defaultAdapterOptions() adapterOptions {
 	return adapterOptions{
 		publishChSize:   10,
 		deliveredChSize: 10,

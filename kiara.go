@@ -36,7 +36,6 @@ func NewPubSub(adapter types.Adapter, options ...Option) *PubSub {
 	for _, o := range options {
 		o.apply(&opts)
 	}
-	// TODO: configure pubsub
 	p := &PubSub{
 		adapter: adapter,
 		opts:    opts,
