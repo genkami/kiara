@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/genkami/kiara/codec/msgpack"
 	"github.com/genkami/kiara/types"
 )
 
@@ -33,15 +32,18 @@ type PubSub struct {
 }
 
 // NewPubSub creates a new PubSub.
-func NewPubSub(adapter types.Adapter) *PubSub {
+func NewPubSub(adapter types.Adapter, options ...Option) *PubSub {
 	opts := defaultOptions()
+	for _, o := range options {
+		o.apply(&opts)
+	}
 	// TODO: configure pubsub
 	p := &PubSub{
 		adapter: adapter,
 		opts:    opts,
 		errorCh: make(chan error, opts.errorChSize),
 		done:    make(chan struct{}),
-		codec:   msgpack.Codec,
+		codec:   opts.codec,
 		state: pubSubState{
 			subs: map[string]subscriptionSet{},
 		},
@@ -205,17 +207,6 @@ func (p *PubSub) unsubscribe(topic string, channel interface{}) error {
 		return p.adapter.Unsubscribe(topic)
 	}
 	return nil
-}
-
-// options is a configuration of PubSub.
-type options struct {
-	errorChSize int
-}
-
-func defaultOptions() options {
-	return options{
-		errorChSize: 10,
-	}
 }
 
 // pubSubState is an internal state of PubSub that cannot be accessed concurrently.
