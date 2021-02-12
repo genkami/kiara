@@ -28,4 +28,6 @@ jobs:
     - name: Set up PubSsub Backends
       run: docker-compose up -d
     - name: Test
-      run: KIARA_TEST_REDIS_ADDR=localhost:6379 go test ./...
+      run: go test ./...
+      env:
+        KIARA_TEST_REDIS_ADDR: "localhost:6379"
