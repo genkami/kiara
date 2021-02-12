@@ -32,7 +32,7 @@ type PubSub struct {
 	state   pubSubState
 }
 
-// NewPubSub createsa new PubSub.
+// NewPubSub creates a new PubSub.
 func NewPubSub(adapter types.Adapter) *PubSub {
 	opts := defaultOptions()
 	// TODO: configure pubsub
@@ -79,14 +79,15 @@ func (p *PubSub) Close() {
 
 // deliver delivers a message to all channels that are subscribing to a message's topic.
 func (p *PubSub) deliver(msg *types.Message) {
+	// Getting subscriptionSet and delivering messages to all its channels must be done with `state.lock` `RLock`ed
+	// in order to guarantee that no messages are sent after `Unsubscribe`d.
 	p.state.lock.RLock()
+	defer p.state.lock.RUnlock()
 	channels, ok := p.state.subs[msg.Topic]
 	if !ok {
-		p.state.lock.RUnlock()
 		return
 	}
 	channels = channels.Copy()
-	p.state.lock.RUnlock()
 	channels.ForEach(func(ch interface{}) {
 		p.deliverTo(ch, msg.Payload)
 	})
