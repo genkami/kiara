@@ -16,7 +16,7 @@ import (
 
 const defaultChSize = 10
 
-var timeoutExpectedNotToExceed = 300 * time.Millisecond
+var timeoutExpectedNotToExceed = 3 * time.Second
 
 func ReceiveMessage(channel interface{}) (interface{}, bool) {
 	chanVal := reflect.ValueOf(channel)

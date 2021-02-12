@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	timeoutExpectedNotToExceed = 300 * time.Millisecond
+	timeoutExpectedNotToExceed = 3 * time.Second
 	timeoutExpectedToExceed    = 10 * time.Millisecond
 )
 

@@ -18,7 +18,7 @@ import (
 
 const defaultChSize = 10
 
-var timeoutExpectedNotToExceed = 300 * time.Millisecond
+var timeoutExpectedNotToExceed = 3 * time.Second
 
 func AssertCodecCanMarshalAndUnmarshal(sent proto.Message, channel interface{}) {
 	It("can marshal and unmarshal the message", func() {
