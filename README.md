@@ -52,7 +52,7 @@ func main() {
 ```
 
 ## Custom Codec
-You can implement your own codec by simple implementing `Marshal` and `Unmarshal`. For example, if you want to encode messages into [WATSON](https://github.com/genkami/watson), you have to implement WATSON codec like this:
+You can implement your own codec by simply implementing `Marshal` and `Unmarshal`. For example, if you want to encode messages into [WATSON](https://github.com/genkami/watson), you have to implement WATSON codec like this:
 
 ``` go
 import 	"github.com/genkami/watson"
