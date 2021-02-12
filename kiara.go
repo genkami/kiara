@@ -99,11 +99,15 @@ func (p *PubSub) deliverTo(channel interface{}, payload []byte) {
 	chanVal := reflect.ValueOf(channel)
 	elemType := chanVal.Type().Elem()
 	var dataVal reflect.Value
-	if elemType.Kind() == reflect.Ptr {
-		dataVal = reflect.New(elemType.Elem())
-	} else {
+	if elemType.Kind() != reflect.Ptr {
 		dataVal = reflect.New(elemType)
+	} else {
+		dataVal = reflect.New(elemType.Elem())
 	}
+	// The type of `dataVal` is either `*elemType` or `elemType` itself here
+	// in order to avoid creating a pointer to pointer.
+	// Note that the type of `dataVal` is different from `elemType` if and
+	// only if `elemType.Kind() != reflect.Ptr`
 	err := p.opts.codec.Unmarshal(payload, dataVal.Interface())
 	if err != nil {
 		select {
@@ -114,6 +118,9 @@ func (p *PubSub) deliverTo(channel interface{}, payload []byte) {
 		return
 	}
 	if elemType.Kind() != reflect.Ptr {
+		// As we described before, in this case the type of `dataVal` is
+		// `*elemType`. So we should `Indirect` it so that `dataVal` can be
+		// sent to `chanVal` (whose type is `chan<- elemType`).
 		dataVal = reflect.Indirect(dataVal)
 	}
 	chosen, _, _ := reflect.Select([]reflect.SelectCase{
