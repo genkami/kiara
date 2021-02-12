@@ -117,6 +117,7 @@ func (a *Adapter) Unsubscribe(topic string) error {
 func (a *Adapter) Close() {
 	close(a.done)
 	a.doneWg.Wait()
+	a.pubSub.Close()
 	a.client.Close()
 }
 
