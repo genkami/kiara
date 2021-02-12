@@ -51,6 +51,18 @@ func main() {
 }
 ```
 
+## Codec
+By default, messages are marshaled into gob format. You can specify which format does Kiara use to marshal and unmarshal messages by passing `WithCodec()` to `NewPubSub()`.
+
+``` go
+import "github.com/genkami/kiara/codec/msgpack"
+
+pubsub := kiara.NewPubSub(
+    adapter.NewAdapter(redisClient),
+    kiara.WithCodec(msgpack.Codec),
+)
+```
+
 ## Custom Codec
 You can implement your own codec by simply implementing `Marshal` and `Unmarshal`. For example, if you want to encode messages into [WATSON](https://github.com/genkami/watson), you have to implement WATSON codec like this:
 
