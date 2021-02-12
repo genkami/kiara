@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"sync"
-	"time"
 
 	"github.com/go-redis/redis/v8"
 
@@ -37,9 +36,11 @@ type Adapter struct {
 }
 
 // NewAdapter returns a new Adapter.
-func NewAdapter(client RedisClient) *Adapter {
+func NewAdapter(client RedisClient, options ...Option) *Adapter {
 	opts := defaultOptions()
-	// TODO: configure Adapter
+	for _, o := range options {
+		o.apply(&opts)
+	}
 	a := &Adapter{
 		client: client,
 		// NOTE: client.Subscribe() does not block when channels is not given.
@@ -122,22 +123,3 @@ func (a *Adapter) Close() {
 }
 
 var _ types.Adapter = &Adapter{}
-
-// option is a configuration of Adapter.
-type options struct {
-	publishChSize       int
-	deliveredChSize     int
-	errorChSize         int
-	subscriptionTimeout time.Duration
-	publishTimeout      time.Duration
-}
-
-func defaultOptions() options {
-	return options{
-		publishChSize:       10,
-		deliveredChSize:     10,
-		errorChSize:         10,
-		subscriptionTimeout: 1 * time.Second,
-		publishTimeout:      1 * time.Second,
-	}
-}
