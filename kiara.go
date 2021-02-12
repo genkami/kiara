@@ -27,7 +27,6 @@ type PubSub struct {
 	errorCh chan error
 	done    chan struct{}
 	doneWg  sync.WaitGroup
-	codec   types.Codec
 	state   pubSubState
 }
 
@@ -43,7 +42,6 @@ func NewPubSub(adapter types.Adapter, options ...Option) *PubSub {
 		opts:    opts,
 		errorCh: make(chan error, opts.errorChSize),
 		done:    make(chan struct{}),
-		codec:   opts.codec,
 		state: pubSubState{
 			subs: map[string]subscriptionSet{},
 		},
@@ -107,7 +105,7 @@ func (p *PubSub) deliverTo(channel interface{}, payload []byte) {
 	} else {
 		dataVal = reflect.New(elemType)
 	}
-	err := p.codec.Unmarshal(payload, dataVal.Interface())
+	err := p.opts.codec.Unmarshal(payload, dataVal.Interface())
 	if err != nil {
 		select {
 		case p.errorCh <- err:
@@ -137,7 +135,7 @@ func (p *PubSub) deliverTo(channel interface{}, payload []byte) {
 // It returns an error when it cannot prepare publishing due to marshaling error or being cancelled by `ctx`.
 // Any other errors are reported asynchronously via PubSub.Errors().
 func (p *PubSub) Publish(ctx context.Context, topic string, data interface{}) error {
-	payload, err := p.codec.Marshal(data)
+	payload, err := p.opts.codec.Marshal(data)
 	if err != nil {
 		return err
 	}
