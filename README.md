@@ -71,4 +71,4 @@ func (_ *WatsonCodec) Unmarshal(src []byte, v interface{}) error {
 
 ## Examples
 * [Basic Usage](./examples/basic-usage/README.md)
-* [Custom Codec](./examples/custom-codec/README.md)
+* [Custom Codec (WATSON × Kiara)](./examples/custom-codec/README.md)
