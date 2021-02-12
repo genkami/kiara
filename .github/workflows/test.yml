@@ -5,7 +5,7 @@ jobs:
     strategy:
       matrix:
         go-version: [1.15.x]
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
     - name: Install Go
@@ -25,5 +25,7 @@ jobs:
         key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
         restore-keys: |
           ${{ runner.os }}-go-
+    - name: Set up PubSsub Backends
+      run: docker-compose up -d
     - name: Test
-      run: go test ./...
+      run: KIARA_TEST_REDIS_ADDR=localhost:6379 go test ./...
