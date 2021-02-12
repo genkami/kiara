@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option go_package = "github.com/genkami/kiara/codec/internal/testproto";
+
+package com.github.genkami.kiara.codec.internal.testproto;
+
+message Channel {
+  string name = 1;
+  uint32 subscribers = 2;
+}

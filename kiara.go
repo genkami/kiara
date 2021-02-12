@@ -101,7 +101,12 @@ func (p *PubSub) deliver(msg *types.Message) {
 func (p *PubSub) deliverTo(channel interface{}, payload []byte) {
 	chanVal := reflect.ValueOf(channel)
 	elemType := chanVal.Type().Elem()
-	dataVal := reflect.New(elemType)
+	var dataVal reflect.Value
+	if elemType.Kind() == reflect.Ptr {
+		dataVal = reflect.New(elemType.Elem())
+	} else {
+		dataVal = reflect.New(elemType)
+	}
 	err := p.codec.Unmarshal(payload, dataVal.Interface())
 	if err != nil {
 		select {
@@ -111,7 +116,9 @@ func (p *PubSub) deliverTo(channel interface{}, payload []byte) {
 		}
 		return
 	}
-	dataVal = reflect.Indirect(dataVal)
+	if elemType.Kind() != reflect.Ptr {
+		dataVal = reflect.Indirect(dataVal)
+	}
 	chosen, _, _ := reflect.Select([]reflect.SelectCase{
 		reflect.SelectCase{Dir: reflect.SelectSend, Chan: chanVal, Send: dataVal},
 		reflect.SelectCase{Dir: reflect.SelectDefault},

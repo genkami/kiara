@@ -18,7 +18,7 @@ const defaultChSize = 10
 
 var timeoutExpectedNotToExceed = 300 * time.Millisecond
 
-func receiveMessage(channel interface{}) (interface{}, bool) {
+func ReceiveMessage(channel interface{}) (interface{}, bool) {
 	chanVal := reflect.ValueOf(channel)
 	chanType := chanVal.Type()
 	if chanType.Kind() != reflect.Chan {
@@ -62,7 +62,7 @@ func AssertCodecCanMarshalAndUnmarshal(codec types.Codec, sent, channel interfac
 		err = pubsub.Publish(ctx, topic, sent)
 		Expect(err).NotTo(HaveOccurred())
 
-		msg, ok := receiveMessage(channel)
+		msg, ok := ReceiveMessage(channel)
 		if !ok {
 			Fail("timeout")
 		}
