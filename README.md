@@ -68,7 +68,7 @@ We have `docker-compose.yml` to set up these dependencies easily. To run tests w
 $ docker-compose up -d
 $ export KIARA_TEST_REDIS_ADDR=localhost:6379
 $ export KIARA_TEST_NATS_URL=nats://localhost:4222
-$ go run ./...
+$ go test ./...
 ```
 
 ## Codec
