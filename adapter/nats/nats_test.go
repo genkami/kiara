@@ -1,18 +1,20 @@
-package redis_test
+package nats_test
 
 import (
-	"github.com/go-redis/redis/v8"
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+
+	"github.com/nats-io/nats.go"
 
 	"github.com/genkami/kiara/adapter/internal/commontest"
-	adapter "github.com/genkami/kiara/adapter/redis"
+	adapter "github.com/genkami/kiara/adapter/nats"
 	"github.com/genkami/kiara/types"
 )
 
-var redisAddr string
+var natsUrl string
 
 var _ = BeforeSuite(func() {
-	redisAddr = commontest.GetEnv("KIARA_TEST_REDIS_ADDR")
+	natsUrl = commontest.GetEnv("KIARA_TEST_NATS_URL")
 })
 
 type env struct{}
@@ -24,10 +26,11 @@ func (e *env) Teardown() {
 }
 
 func (e *env) NewAdapter() types.Adapter {
-	redisClient := redis.NewClient(&redis.Options{Addr: redisAddr})
-	return adapter.NewAdapter(redisClient)
+	conn, err := nats.Connect(natsUrl)
+	Expect(err).NotTo(HaveOccurred())
+	return adapter.NewAdapter(conn)
 }
 
-var _ = Describe("Redis", func() {
+var _ = Describe("Nats", func() {
 	commontest.AssertAdapterIsImplementedCorrectly(&env{})
 })

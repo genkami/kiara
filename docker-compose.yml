@@ -4,3 +4,9 @@ services:
     image: "redis:alpine"
     ports:
       - "6379:6379"
+  nats:
+    image: "nats:2.1.9-alpine3.12"
+    ports:
+      - "4222:4222"
+      - "6222:6222"
+      - "8222:8222"

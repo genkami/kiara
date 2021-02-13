@@ -37,6 +37,7 @@ jobs:
       run: go test ./...
       env:
         KIARA_TEST_REDIS_ADDR: "localhost:6379"
+        KIARA_TEST_NATS_URL: "nats://localhost:4222"
 
     # Lint
 

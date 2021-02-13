@@ -1,6 +1,8 @@
 package commontest
 
 import (
+	"fmt"
+	"os"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -13,6 +15,14 @@ var (
 	timeoutExpectedNotToExceed = 3 * time.Second
 	timeoutExpectedToExceed    = 10 * time.Millisecond
 )
+
+func GetEnv(name string) string {
+	value := os.Getenv(name)
+	if value == "" {
+		Fail(fmt.Sprintf("environment variable %s not set", name))
+	}
+	return value
+}
 
 type AdapterEnv interface {
 	Setup()
