@@ -55,6 +55,7 @@
        const msg = {'from': msgFrom, 'body': msgBody};
        console.log('sending', msg);
        conn.send(JSON.stringify(msg));
+       document.getElementById('message').value = '';
        return false;
      };
 
