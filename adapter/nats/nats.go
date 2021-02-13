@@ -58,6 +58,8 @@ func NewAdapter(conn *nats.Conn) *Adapter {
 		opts:              opts,
 		subs:              newSubscriptions(),
 	}
+	conn.SetErrorHandler(a.natsErrorHandler())
+	conn.SetDisconnectErrHandler(a.natsConnErrorHandler())
 	a.doneWg.Add(1)
 	go a.run()
 	return a
@@ -150,6 +152,26 @@ func (a *Adapter) Close() {
 	close(a.done)
 	a.doneWg.Wait()
 	a.conn.Close()
+}
+
+func (a *Adapter) natsErrorHandler() nats.ErrHandler {
+	return func(_ *nats.Conn, _ *nats.Subscription, err error) {
+		select {
+		case a.errorCh <- err:
+		default:
+			// discard
+		}
+	}
+}
+
+func (a *Adapter) natsConnErrorHandler() nats.ConnErrHandler {
+	return func(_ *nats.Conn, err error) {
+		select {
+		case a.errorCh <- err:
+		default:
+			// discard
+		}
+	}
 }
 
 // subscriptions manages topics (or subject in NATS term).
