@@ -1,5 +1,7 @@
 # Custom Codec
 
+This example shows how to implement your own codec. In this example, we implement a custom codec named `WatsonCodec` that encodes messages into [WATSON](https://github.com/genkami/watson).
+
 ## Usage
 
 First, you need to run redis-server by executing the following command:
