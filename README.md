@@ -68,6 +68,12 @@ pubsub := kiara.NewPubSub(
 )
 ```
 
+Currently these codecs are officialy available:
+* [gob](https://pkg.go.dev/github.com/genkami/kiara/codec/gob)
+* [JSON](https://pkg.go.dev/github.com/genkami/kiara/codec/json)
+* [MessagePack](https://pkg.go.dev/github.com/genkami/kiara/codec/msgpack)
+* [Protocol Buffers](https://pkg.go.dev/github.com/genkami/kiara/codec/proto)
+
 ## Custom Codec
 You can implement your own codec by simply implementing `Marshal` and `Unmarshal`. For example, if you want to encode messages into [WATSON](https://github.com/genkami/watson), you have to implement WATSON codec like this:
 
