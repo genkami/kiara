@@ -11,9 +11,6 @@
       <div class="row">
         <div class="col s12">
           <h1>Kiara Chat</h1>
-          <p id="websocket-not-supported" style="display: none;">
-            Your Browser does not support WebSocket.
-          </p>
           <form id="form">
             <div class="row">
               <div class="input-field col s3">
@@ -60,7 +57,7 @@
      };
 
      const onConnectionClosed = () => {
-       showError("WebSocket connection closed. Please reload this page.")
+       showError('WebSocket connection closed. Please reload this page.');
        console.log('connection closed');
      };
 
@@ -86,8 +83,8 @@
        form.addEventListener('submit', onFormSubmitted);
 
        if (!window['WebSocket']) {
-         const msg = document.getElementById('websocket-not-supported');
-         msg.style.display = 'block';
+         showError('Your Browser does not support WebSocket.');
+         return;
        }
 
        conn = new WebSocket('ws://' + document.location.host + '/ws');
