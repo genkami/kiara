@@ -39,7 +39,8 @@ type Adapter struct {
 	doneWg sync.WaitGroup
 	opts   options
 
-	subs *subscriptions
+	subsLock sync.Mutex
+	subs     map[string]*nats.Subscription
 }
 
 var _ types.Adapter = &Adapter{}
@@ -56,7 +57,7 @@ func NewAdapter(conn *nats.Conn) *Adapter {
 		errorCh:           make(chan error, opts.errorChSize),
 		done:              make(chan struct{}),
 		opts:              opts,
-		subs:              newSubscriptions(),
+		subs:              map[string]*nats.Subscription{},
 	}
 	conn.SetErrorHandler(a.natsErrorHandler())
 	conn.SetDisconnectErrHandler(a.natsConnErrorHandler())
@@ -120,9 +121,9 @@ func (a *Adapter) Errors() <-chan error {
 }
 
 func (a *Adapter) Subscribe(topic string) error {
-	a.subs.lock.Lock()
-	defer a.subs.lock.Unlock()
-	if _, ok := a.subs.subs[topic]; ok {
+	a.subsLock.Lock()
+	defer a.subsLock.Unlock()
+	if _, ok := a.subs[topic]; ok {
 		return ErrAlreadySubscribed
 	}
 
@@ -130,7 +131,7 @@ func (a *Adapter) Subscribe(topic string) error {
 	if err != nil {
 		return err
 	}
-	a.subs.subs[topic] = sub
+	a.subs[topic] = sub
 	err = a.conn.Flush()
 	if err != nil {
 		select {
@@ -143,14 +144,14 @@ func (a *Adapter) Subscribe(topic string) error {
 }
 
 func (a *Adapter) Unsubscribe(topic string) error {
-	a.subs.lock.Lock()
-	defer a.subs.lock.Unlock()
-	if sub, ok := a.subs.subs[topic]; ok {
+	a.subsLock.Lock()
+	defer a.subsLock.Unlock()
+	if sub, ok := a.subs[topic]; ok {
 		err := sub.Unsubscribe()
 		if err != nil {
 			return err
 		}
-		delete(a.subs.subs, topic)
+		delete(a.subs, topic)
 	}
 	return nil
 }
@@ -179,20 +180,6 @@ func (a *Adapter) natsConnErrorHandler() nats.ConnErrHandler {
 		default:
 			// discard
 		}
-	}
-}
-
-// subscriptions manages topics (or subject in NATS term).
-type subscriptions struct {
-	lock sync.Mutex
-
-	// keys are subjects that Adapter is subscribing.
-	subs map[string]*nats.Subscription
-}
-
-func newSubscriptions() *subscriptions {
-	return &subscriptions{
-		subs: map[string]*nats.Subscription{},
 	}
 }
 
