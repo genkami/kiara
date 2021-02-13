@@ -80,7 +80,7 @@ pubsub := kiara.NewPubSub(
 )
 ```
 
-Currently these codecs are officialy available:
+Currently these codecs are officially available:
 * [gob](https://pkg.go.dev/github.com/genkami/kiara/codec/gob)
 * [JSON](https://pkg.go.dev/github.com/genkami/kiara/codec/json)
 * [MessagePack](https://pkg.go.dev/github.com/genkami/kiara/codec/msgpack)
