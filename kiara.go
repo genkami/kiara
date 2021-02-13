@@ -164,8 +164,11 @@ func (p *PubSub) Errors() <-chan error {
 // This means any messages that are `Publish`ed toghther with the same topic are
 // sent to the given channel.
 //
-// A `channel` must be the type of `chan<- T` where `T` is any type that can be
+// A `channel` must be the type of `chan T` or `chan<- T` where `T` is any type that can be
 // `Unmarshal`ed by the codec of the `PubSub`.
+//
+// Note that PubSub internally passes *T to its internal codec when T is not a pointer.
+// In most cases you don't have to care about it but it may be confusing when the ccodec assumes that the data implements certain interfaces.
 //
 // It's ok to subscribe to one topic more than one times.
 // In this case, messages are broadcasted to all channels that are subscribing to the topic.
