@@ -3,7 +3,7 @@ module github.com/genkami/kiara
 go 1.15
 
 require (
-	github.com/genkami/watson v0.2.1
+	github.com/genkami/watson v1.0.0
 	github.com/go-redis/redis/v8 v8.5.0
 	github.com/golang/protobuf v1.4.3
 	github.com/gorilla/websocket v1.4.2

@@ -15,6 +15,8 @@ github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4
 github.com/fxamacker/cbor/v2 v2.2.0/go.mod h1:TA1xS00nchWmaBnEIxPSE5oHLuJBAVvqrtAnWBwBCVo=
 github.com/genkami/watson v0.2.1 h1:+DSHuHpG87DD2VEq4vPXwOl1f1aSMT43Qs11dZXNkEA=
 github.com/genkami/watson v0.2.1/go.mod h1:h0pRN42xxvCHX/Oyopf4AxtAv4z0+51qRN+K6UxF70g=
+github.com/genkami/watson v1.0.0 h1:wnitYUtaR8GWNQhvJ/VCoqOrC12iRRvtWlff9IKVJmI=
+github.com/genkami/watson v1.0.0/go.mod h1:h0pRN42xxvCHX/Oyopf4AxtAv4z0+51qRN+K6UxF70g=
 github.com/go-redis/redis v6.15.9+incompatible h1:K0pv1D7EQUjfyoMql+r/jZqCLizCGKFlFgcHWWmHQjg=
 github.com/go-redis/redis/v8 v8.5.0 h1:L3r1Q3I5WOUdXZGCP6g44EruKh0u3n6co5Hl5xWkdGA=
 github.com/go-redis/redis/v8 v8.5.0/go.mod h1:YmEcgBDttjnkbMzDAhDtQxY9yVA7jMN6PCR5HeMvqFE=
