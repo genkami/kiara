@@ -115,3 +115,11 @@ conn, err := nats.Connect("nats://localhost:4222")
 // error handling omitted
 pubsub := kiara.NewPubSub(adapter.NewAdapter(conn))
 ```
+
+## License
+
+Distributed under the MIT License. See LICENSE for more information.
+
+## Acknowledgements
+
+This library is highly inspired by [phoenixframework/phoenix_pubsub](https://github.com/phoenixframework/phoenix_pubsub), [nats-io/nats.go](https://github.com/nats-io/nats.go), and the majestic phoenix [Takanashi Kiara](https://www.youtube.com/channel/UCHsx4Hqa-1ORjQTh9TYDhww?sub_confirmation=1).
