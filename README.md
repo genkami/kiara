@@ -56,7 +56,7 @@ func main() {
 ```
 
 ## Codec
-By default, messages are marshaled into gob format. You can specify which format does Kiara use to marshal and unmarshal messages by passing `WithCodec()` to `NewPubSub()`.
+By default, messages are marshaled into gob format. You can specify which codec Kiara uses to marshal and unmarshal messages by passing `WithCodec()` to `NewPubSub()`.
 
 ``` go
 import "github.com/genkami/kiara/codec/msgpack"
