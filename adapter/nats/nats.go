@@ -4,6 +4,7 @@ package nats
 import (
 	"errors"
 	"sync"
+	"time"
 
 	"github.com/nats-io/nats.go"
 
@@ -46,6 +47,7 @@ var _ types.Adapter = &Adapter{}
 // NewAdapter creates a new Adapter.
 func NewAdapter(conn *nats.Conn) *Adapter {
 	opts := defaultOptions()
+	// TODO: configure options
 	a := &Adapter{
 		conn:              conn,
 		receivedNatsMsgCh: make(chan *nats.Msg, receivedNatsMsgChSize),
@@ -63,6 +65,8 @@ func NewAdapter(conn *nats.Conn) *Adapter {
 
 func (a *Adapter) run() {
 	defer a.doneWg.Done()
+	ticker := time.NewTicker(a.opts.flushInterval)
+	defer ticker.Stop()
 
 	for {
 		select {
@@ -84,6 +88,15 @@ func (a *Adapter) run() {
 			default:
 				select {
 				case a.errorCh <- ErrSlowConsumer:
+				default:
+					// discard
+				}
+			}
+		case <-ticker.C:
+			err := a.conn.Flush()
+			if err != nil {
+				select {
+				case a.errorCh <- err:
 				default:
 					// discard
 				}
@@ -158,6 +171,7 @@ type options struct {
 	publishChSize   int
 	deliveredChSize int
 	errorChSize     int
+	flushInterval   time.Duration
 }
 
 func defaultOptions() options {
@@ -165,5 +179,6 @@ func defaultOptions() options {
 		publishChSize:   100,
 		deliveredChSize: 100,
 		errorChSize:     100,
+		flushInterval:   100 * time.Millisecond,
 	}
 }
