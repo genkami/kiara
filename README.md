@@ -10,6 +10,7 @@ Kiara is a Go equivalent of Phoenix PubSub that makes it easy for Go application
 ## Examples
 * [Basic Usage](https://github.com/genkami/kiara/tree/main/examples/basic-usage)
 * [Custom Codec (WATSON × Kiara)](https://github.com/genkami/kiara/tree/main/examples/custom-codec)
+* [NATS Adapter](https://github.com/genkami/kiara/tree/main/examples/nats-adapter)
 
 ## Basic Usage (with Redis Backend)
 
@@ -82,4 +83,35 @@ func (_ *WatsonCodec) Marshal(v interface{}) ([]byte, error) {
 func (_ *WatsonCodec) Unmarshal(src []byte, v interface{}) error {
 	return watson.Unmarshal(src, v)
 }
+```
+
+## Backend-Agnostic
+Kiara does not depend on specific message broker implementation. Currently these message brokers are officially supported:
+
+* [Redis](https://pkg.go.dev/github.com/genkami/kiara/adapter/redis)
+* [NATS](https://pkg.go.dev/github.com/genkami/kiara/adapter/nats)
+
+You can change backend message brokers with little effort. Here are examples of connecting to Redis and NATS as a Kiara's backend.
+
+Example(Redis):
+
+``` go
+import (
+    "github.com/go-redis/redis/v8"
+    adapter "github.com/genkami/kiara/adapter/redis"
+)
+redisClient := redis.NewClient(&redis.Options{Addr: "localhost:6379"})
+pubsub := kiara.NewPubSub(adapter.NewAdapter(redisClient))
+```
+
+Example(NATS):
+
+``` go
+import (
+    "github.com/nats-io/nats.go"
+    adapter "github.com/genkami/kiara/adapter/nats"
+)
+conn, err := nats.Connect("nats://localhost:4222")
+// error handling omitted
+pubsub := kiara.NewPubSub(adapter.NewAdapter(conn))
 ```
