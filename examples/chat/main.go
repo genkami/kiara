@@ -65,6 +65,7 @@ func main() {
 
 	http.HandleFunc("/", server.serveHome)
 	http.HandleFunc("/ws", server.serveWs)
+	log.Printf("server is listening on %s...", bindAddr)
 	err = http.ListenAndServe(bindAddr, nil)
 	if err != nil && err != http.ErrServerClosed {
 		panic(err)
