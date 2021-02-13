@@ -33,7 +33,7 @@ func AssertCodecCanMarshalAndUnmarshal(sent *pb.Channel, channel interface{}) {
 		topic := "room:123"
 		sub, err := pubsub.Subscribe(topic, channel)
 		Expect(err).NotTo(HaveOccurred())
-		defer sub.Unsubscribe()
+		defer func() { Expect(sub.Unsubscribe()).NotTo(HaveOccurred()) }()
 
 		ctx, cancel := context.WithTimeout(context.Background(), timeoutExpectedNotToExceed)
 		defer cancel()

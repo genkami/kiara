@@ -42,7 +42,8 @@ var _ = Describe("Kiara", func() {
 				var ch chan int = make(chan int, defaultChSize)
 				sub, err := pubsub.Subscribe("room:123", ch)
 				Expect(err).NotTo(HaveOccurred())
-				sub.Unsubscribe()
+				err = sub.Unsubscribe()
+				Expect(err).NotTo(HaveOccurred())
 			})
 		})
 
@@ -51,7 +52,8 @@ var _ = Describe("Kiara", func() {
 				var ch chan<- int = make(chan int, defaultChSize)
 				sub, err := pubsub.Subscribe("room:123", ch)
 				Expect(err).NotTo(HaveOccurred())
-				sub.Unsubscribe()
+				err = sub.Unsubscribe()
+				Expect(err).NotTo(HaveOccurred())
 			})
 		})
 
@@ -79,7 +81,7 @@ var _ = Describe("Kiara", func() {
 				ch := make(chan int, defaultChSize)
 				sub, err := pubsub.Subscribe(topic, ch)
 				Expect(err).NotTo(HaveOccurred())
-				defer sub.Unsubscribe()
+				defer func() { Expect(sub.Unsubscribe()).NotTo(HaveOccurred()) }()
 				ctx, cancel := context.WithTimeout(context.Background(), timeoutExpectedNotToExceed)
 				defer cancel()
 				var sent int = 123
@@ -101,7 +103,7 @@ var _ = Describe("Kiara", func() {
 				ch := make(chan int, defaultChSize)
 				sub, err := pubsub.Subscribe(anotherTopic, ch)
 				Expect(err).NotTo(HaveOccurred())
-				defer sub.Unsubscribe()
+				defer func() { Expect(sub.Unsubscribe()).NotTo(HaveOccurred()) }()
 				ctx, cancel := context.WithTimeout(context.Background(), timeoutExpectedNotToExceed)
 				defer cancel()
 				var sent int = 123
@@ -125,7 +127,7 @@ var _ = Describe("Kiara", func() {
 				Expect(err).NotTo(HaveOccurred())
 				defer func() {
 					if !unsubscribed {
-						sub.Unsubscribe()
+						Expect(sub.Unsubscribe()).NotTo(HaveOccurred())
 					}
 				}()
 
@@ -169,7 +171,7 @@ var _ = Describe("Kiara", func() {
 					ch := make(chan int, defaultChSize)
 					sub, err := pubsub.Subscribe(topic, ch)
 					Expect(err).NotTo(HaveOccurred())
-					defer sub.Unsubscribe()
+					defer func() { Expect(sub.Unsubscribe()).NotTo(HaveOccurred()) }()
 					chs = append(chs, ch)
 				}
 
@@ -199,14 +201,14 @@ var _ = Describe("Kiara", func() {
 				Expect(err).NotTo(HaveOccurred())
 				defer func() {
 					if !subAUnsubscribed {
-						subA.Unsubscribe()
+						Expect(subA.Unsubscribe()).NotTo(HaveOccurred())
 					}
 				}()
 
 				chB := make(chan int, defaultChSize)
 				subB, err := pubsub.Subscribe(topic, chB)
 				Expect(err).NotTo(HaveOccurred())
-				defer subB.Unsubscribe()
+				defer func() { Expect(subB.Unsubscribe()).NotTo(HaveOccurred()) }()
 
 				ctx, cancel := context.WithTimeout(context.Background(), timeoutExpectedNotToExceed)
 				defer cancel()
