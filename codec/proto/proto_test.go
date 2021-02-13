@@ -20,7 +20,7 @@ const defaultChSize = 10
 
 var timeoutExpectedNotToExceed = 3 * time.Second
 
-func AssertCodecCanMarshalAndUnmarshal(sent proto.Message, channel interface{}) {
+func AssertCodecCanMarshalAndUnmarshal(sent *pb.Channel, channel interface{}) {
 	It("can marshal and unmarshal the message", func() {
 		broker := inmemory.NewBroker()
 		defer broker.Close()
@@ -49,11 +49,15 @@ func AssertCodecCanMarshalAndUnmarshal(sent proto.Message, channel interface{}) 
 				Fail("timeout")
 			}
 		}
-		protoMsg, ok := msg.(proto.Message)
+		received, ok := msg.(*pb.Channel)
 		if !ok {
-			Fail(fmt.Sprintf("expected proto.Message but got %T", msg))
+			ch, ok := msg.(pb.Channel)
+			if !ok {
+				Fail(fmt.Sprintf("expected proto.Message but got %T", msg))
+			}
+			received = &ch
 		}
-		Expect(proto.Equal(sent, protoMsg)).To(BeTrue())
+		Expect(proto.Equal(sent, received)).To(BeTrue())
 	})
 }
 
@@ -85,4 +89,8 @@ var _ = Describe("Proto", func() {
 	AssertCodecCanMarshalAndUnmarshal(
 		&pb.Channel{Name: "Watson Amelia Ch.", Subscribers: 1000000},
 		make(chan *pb.Channel, defaultChSize))
+
+	AssertCodecCanMarshalAndUnmarshal(
+		&pb.Channel{Name: "Watson Amelia Ch.", Subscribers: 1000000},
+		make(chan pb.Channel, defaultChSize))
 })
