@@ -7,26 +7,30 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   </head>
   <body>
-    <div class="row">
-      <div class="col s8 offset-m2">
-        <h1>Kiara Chat</h1>
-        <p id="websocket-not-supported" style="display: none;">
-          Your Browser does not support WebSocket.
-        </p>
-        <form id="form">
-          <div class="row">
-            <div class="input-field col s4">
-              <input id="name" name="name" type="text" required class="validate">
-              <label for="name">Name</label>
+    <div class="container">
+      <div class="row">
+        <div class="col s12">
+          <h1>Kiara Chat</h1>
+          <p id="websocket-not-supported" style="display: none;">
+            Your Browser does not support WebSocket.
+          </p>
+          <form id="form">
+            <div class="row">
+              <div class="input-field col s3">
+                <input id="name" name="name" type="text" required class="validate">
+                <label for="name">Name</label>
+              </div>
+              <div class="input-field col s9">
+                <input id="message" name="message" type="text" required class="validate">
+                <label for="name">Message</label>
+              </div>
             </div>
-            <div class="input-field col s4">
-              <input id="message" name="message" type="text" required class="validate">
-              <label for="name">Message</label>
-            </div>
-          </div>
-          <input type="submit" value="Send" class="btn">
-        </form>
-        <div id="messages"></div>
+            <input type="submit" value="Send" class="btn">
+          </form>
+        </div>
+      </div>
+      <div class="row">
+        <div id="messages" class="col s8 offset-s2"></div>
       </div>
       <div id="error-modal" class="modal">
         <div id="error-modal-message" class="modal-content">
@@ -66,7 +70,7 @@
        const msgView = document.createElement('p');
        const nameView = document.createElement('span');
        const bodyView = document.createElement('span');
-       msgView.classList.add('card-panel', 'grey', 'lighten-5', 'z-depth-1');
+       msgView.classList.add('card-panel', 'grey', 'lighten-5', 'z-depth-1', 'hoverable');
        nameView.classList.add('chip');
        // bodyView.classList.add();
        nameView.innerText = msg.from;
