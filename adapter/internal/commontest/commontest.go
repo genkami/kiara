@@ -51,7 +51,12 @@ func AssertAdapterIsImplementedCorrectly(env AdapterEnv) {
 				adapter.Publish() <- &types.Message{Topic: topic, Payload: payload}
 				select {
 				case <-time.After(timeoutExpectedNotToExceed):
-					Fail("message disappeared")
+					select {
+					case err := <-adapter.Errors():
+						Expect(err).NotTo(HaveOccurred())
+					default:
+						Fail("message disappeared")
+					}
 				case msg := <-adapter.Delivered():
 					Expect(msg).To(Equal(&types.Message{Topic: topic, Payload: payload}))
 				}
@@ -86,7 +91,12 @@ func AssertAdapterIsImplementedCorrectly(env AdapterEnv) {
 				pub.Publish() <- &types.Message{Topic: topic, Payload: payload}
 				select {
 				case <-time.After(timeoutExpectedNotToExceed):
-					Fail("message disappeared")
+					select {
+					case err := <-sub.Errors():
+						Expect(err).NotTo(HaveOccurred())
+					default:
+						Fail("message disappeared")
+					}
 				case msg := <-sub.Delivered():
 					Expect(msg).To(Equal(&types.Message{Topic: topic, Payload: payload}))
 				}
@@ -114,7 +124,12 @@ func AssertAdapterIsImplementedCorrectly(env AdapterEnv) {
 				for _, sub := range subs {
 					select {
 					case <-time.After(timeoutExpectedNotToExceed):
-						Fail("message disappeared")
+						select {
+						case err := <-sub.Errors():
+							Expect(err).NotTo(HaveOccurred())
+						default:
+							Fail("message disappeared")
+						}
 					case msg := <-sub.Delivered():
 						Expect(msg).To(Equal(&types.Message{Topic: topic, Payload: payload}))
 					}
