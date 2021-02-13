@@ -8,6 +8,9 @@ jobs:
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
+
+    # Set Up
+
     - name: Install Go
       uses: actions/setup-go@v2
       with:
@@ -27,7 +30,17 @@ jobs:
           ${{ runner.os }}-go-
     - name: Set up PubSsub Backends
       run: docker-compose up -d
+
+    # Test
+
     - name: Test
       run: go test ./...
       env:
         KIARA_TEST_REDIS_ADDR: "localhost:6379"
+
+    # Lint
+
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v2
+      with:
+          version: v1.29
