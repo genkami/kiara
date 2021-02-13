@@ -12,8 +12,9 @@ import (
 )
 
 var (
-	ErrAlreadySubscribed = errors.New("already subscribed")
-	ErrSlowConsumer      = errors.New("slow consumer")
+	// This error is reported via Adapter.Errors() when the adapter can't deliver
+	// succeeding messages arrived from Redis because Adapter.Delivered() is already full.
+	ErrSlowConsumer = errors.New("slow consumer")
 )
 
 // RedisClient is an abstract interface for Redis client.
@@ -34,6 +35,8 @@ type Adapter struct {
 	doneWg      sync.WaitGroup
 	opts        options
 }
+
+var _ types.Adapter = &Adapter{}
 
 // NewAdapter returns a new Adapter.
 func NewAdapter(client RedisClient, options ...Option) *Adapter {
@@ -121,5 +124,3 @@ func (a *Adapter) Close() {
 	a.pubSub.Close()
 	a.client.Close()
 }
-
-var _ types.Adapter = &Adapter{}

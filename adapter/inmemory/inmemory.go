@@ -130,6 +130,8 @@ type Adapter struct {
 	opts      adapterOptions
 }
 
+var _ types.Adapter = &Adapter{}
+
 func NewAdapter(broker *Broker) *Adapter {
 	opts := defaultAdapterOptions()
 	a := &Adapter{
@@ -206,8 +208,6 @@ func (a *Adapter) Close() {
 	a.broker.unregisterAdapter(a)
 	close(a.done)
 }
-
-var _ types.Adapter = &Adapter{}
 
 // adapterOptions is a configuration of Adapter.
 type adapterOptions struct {
