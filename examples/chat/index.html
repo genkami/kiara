@@ -28,10 +28,21 @@
         </form>
         <div id="messages"></div>
       </div>
+      <div id="error-modal" class="modal">
+        <div id="error-modal-message" class="modal-content">
+        </div>
+      </div>
     </div>
 
     <script>
      var conn;
+
+     const showError = msg => {
+       const modal = document.getElementById('error-modal');
+       const message = document.getElementById('error-modal-message');
+       message.innerHTML = msg;
+       M.Modal.getInstance(modal).open();
+     }
 
      const onFormSubmitted = e => {
        e.preventDefault();
@@ -44,7 +55,7 @@
      };
 
      const onConnectionClosed = () => {
-       // TODO: show dialog
+       showError("WebSocket connection closed. Please reload this page.")
        console.log('connection closed');
      };
 
@@ -80,6 +91,12 @@
      };
 
      window.addEventListener('load', initialize);
+
+     // Initialize Materialize Modal
+     document.addEventListener('DOMContentLoaded', function() {
+       const elems = document.querySelectorAll('.modal');
+       var instances = M.Modal.init(elems, {});
+     });
 
     </script>
   </body>
