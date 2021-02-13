@@ -56,6 +56,18 @@ func main() {
 }
 ```
 
+## Run Test
+To run an entire test, you need to run Redis and NATS, and to tell their addresses to test cases by setting environment variables.
+
+We have `docker-compose.yml` to set up these dependencies easily. To run tests with docker-compose, type these following commands:
+
+```
+$ docker-compose up -d
+$ export KIARA_TEST_REDIS_ADDR=localhost:6379
+$ export KIARA_TEST_NATS_URL=nats://localhost:4222
+$ go run ./...
+```
+
 ## Codec
 By default, messages are marshaled into gob format. You can specify which codec Kiara uses to marshal and unmarshal messages by passing `WithCodec()` to `NewPubSub()`.
 
