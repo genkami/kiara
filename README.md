@@ -11,6 +11,9 @@ Kiara is a Go equivalent of Phoenix PubSub that makes it easy for Go application
 * [Basic Usage](https://github.com/genkami/kiara/tree/main/examples/basic-usage)
 * [Custom Codec (WATSON × Kiara)](https://github.com/genkami/kiara/tree/main/examples/custom-codec)
 * [NATS Adapter](https://github.com/genkami/kiara/tree/main/examples/nats-adapter)
+* [Chat](https://github.com/genkami/kiara/tree/main/examples/chat)
+
+![demo chat application](./doc/img/kiara-chat-demo.gif)
 
 ## Basic Usage (with Redis Backend)
 
