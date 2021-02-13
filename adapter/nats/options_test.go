@@ -1,9 +1,7 @@
-package redis
+package nats
 
 import (
-	"time"
-
-	"github.com/go-redis/redis/v8"
+	"github.com/nats-io/nats.go"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -12,9 +10,10 @@ import (
 
 var _ = Describe("Options", func() {
 	newAdapter := func(opts ...Option) *Adapter {
-		redisAddr := commontest.GetEnv("KIARA_TEST_REDIS_ADDR")
-		redisClient := redis.NewClient(&redis.Options{Addr: redisAddr})
-		return NewAdapter(redisClient, opts...)
+		natsUrl := commontest.GetEnv("KIARA_TEST_NATS_URL")
+		conn, err := nats.Connect(natsUrl)
+		Expect(err).NotTo(HaveOccurred())
+		return NewAdapter(conn, opts...)
 	}
 
 	Describe("PublishChannelSize", func() {
@@ -68,36 +67,11 @@ var _ = Describe("Options", func() {
 		})
 	})
 
-	Describe("SubscriptionTimeout", func() {
+	Describe("FlushInterval", func() {
 		Context("when the option is not set", func() {
 			It("uses the default value", func() {
 				adapter := newAdapter()
-				Expect(adapter.opts.subscriptionTimeout).To(Equal(defaultSubscriptionTimeout))
-			})
-		})
-
-		Context("when the option is set", func() {
-			It("uses the give value", func() {
-				to := 1 * time.Minute
-				adapter := newAdapter(SubscriptionTimeout(to))
-				Expect(adapter.opts.subscriptionTimeout).To(Equal(to))
-			})
-		})
-	})
-
-	Describe("PublishTimeout", func() {
-		Context("when the option is not set", func() {
-			It("uses the default value", func() {
-				adapter := newAdapter()
-				Expect(adapter.opts.publishTimeout).To(Equal(defaultPublishTimeout))
-			})
-		})
-
-		Context("when the option is set", func() {
-			It("uses the give value", func() {
-				to := 1 * time.Minute
-				adapter := newAdapter(PublishTimeout(to))
-				Expect(adapter.opts.publishTimeout).To(Equal(to))
+				Expect(adapter.opts.flushInterval).To(Equal(defaultFlushInterval))
 			})
 		})
 	})

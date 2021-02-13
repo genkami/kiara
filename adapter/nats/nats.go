@@ -46,9 +46,11 @@ type Adapter struct {
 var _ types.Adapter = &Adapter{}
 
 // NewAdapter creates a new Adapter.
-func NewAdapter(conn *nats.Conn) *Adapter {
+func NewAdapter(conn *nats.Conn, options ...Option) *Adapter {
 	opts := defaultOptions()
-	// TODO: configure options
+	for _, o := range options {
+		o.apply(&opts)
+	}
 	a := &Adapter{
 		conn:              conn,
 		receivedNatsMsgCh: make(chan *nats.Msg, receivedNatsMsgChSize),
@@ -180,22 +182,5 @@ func (a *Adapter) natsConnErrorHandler() nats.ConnErrHandler {
 		default:
 			// discard
 		}
-	}
-}
-
-// options is a configuration of Adapter.
-type options struct {
-	publishChSize   int
-	deliveredChSize int
-	errorChSize     int
-	flushInterval   time.Duration
-}
-
-func defaultOptions() options {
-	return options{
-		publishChSize:   100,
-		deliveredChSize: 100,
-		errorChSize:     100,
-		flushInterval:   100 * time.Millisecond,
 	}
 }
