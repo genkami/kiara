@@ -1,0 +1,69 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Kiara Chat</title>
+  </head>
+  <body>
+    <h1>Kiara Chat</h1>
+    <p id="websocket-not-supported" style="display: none;">
+      Your Browser does not support WebSocket.
+    </p>
+    <form id="form">
+      Name: <input id="name" type="text" value="Anonymous"><br>
+      Message: <input id="message" type="text" value="Hello"><br>
+      <input type="submit" value="Send">
+    </form>
+    <div id="messages">
+    </div>
+
+    <script>
+     var conn;
+
+     const onFormSubmitted = e => {
+       e.preventDefault();
+       const msgFrom = document.getElementById('name').value;
+       const msgBody = document.getElementById('message').value;
+       const msg = {'from': msgFrom, 'body': msgBody};
+       console.log('sending', msg);
+       conn.send(JSON.stringify(msg));
+       return false;
+     };
+
+     const onConnectionClosed = () => {
+       // TODO: show dialog
+       console.log('connection closed');
+     };
+
+     const onMessage = e => {
+       const msg = JSON.parse(e.data);
+       console.log('message received', msg);
+       const messagesView = document.getElementById('messages');
+       const msgView = document.createElement('p');
+       const nameView = document.createElement('span');
+       const bodyView = document.createElement('span');
+       nameView.innerText = msg.from;
+       bodyView.innerText = msg.body;
+       msgView.appendChild(nameView);
+       msgView.appendChild(bodyView);
+       messagesView.appendChild(msgView);
+     };
+
+     const initialize = () => {
+       const form = document.getElementById('form');
+       form.addEventListener('submit', onFormSubmitted);
+
+       if (!window['WebSocket']) {
+         const msg = document.getElementById('websocket-not-supported');
+         msg.style.display = 'block';
+       }
+
+       conn = new WebSocket('ws://' + document.location.host + '/ws');
+       conn.addEventListener('close', onConnectionClosed);
+       conn.addEventListener('message', onMessage);
+     };
+
+     window.addEventListener('load', initialize);
+
+    </script>
+  </body>
+</html>
