@@ -131,6 +131,14 @@ func (a *Adapter) Subscribe(topic string) error {
 		return err
 	}
 	a.subs.subs[topic] = sub
+	err = a.conn.Flush()
+	if err != nil {
+		select {
+		case a.errorCh <- err:
+		default:
+			// discard
+		}
+	}
 	return nil
 }
 
