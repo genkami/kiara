@@ -38,15 +38,16 @@ func NewPubSub(adapter types.Adapter, options ...Option) *PubSub {
 	for _, o := range options {
 		o.apply(&opts)
 	}
-	// TODO: configure
-	publishCh := make(chan *types.Message, 100)
-	deliveredCh := make(chan *types.Message, 100)
+
+	publishCh := make(chan *types.Message, opts.publishChSize)
+	deliveredCh := make(chan *types.Message, opts.deliveredChSize)
 	errorCh := make(chan error, opts.errorChSize)
 	pipe := &types.Pipe{
 		Publish:   publishCh,
 		Delivered: deliveredCh,
 		Errors:    errorCh,
 	}
+
 	p := &PubSub{
 		adapter:     adapter,
 		opts:        opts,

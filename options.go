@@ -5,18 +5,26 @@ import (
 	"github.com/genkami/kiara/types"
 )
 
-const defaultErrorChannelSize = 100
+const (
+	defaultPublishChannelSize   = 100
+	defaultDeliveredChannelSize = 100
+	defaultErrorChannelSize     = 100
+)
 
 // options is a configuration of PubSub.
 type options struct {
-	errorChSize int
-	codec       types.Codec
+	publishChSize   int
+	deliveredChSize int
+	errorChSize     int
+	codec           types.Codec
 }
 
 func defaultOptions() options {
 	return options{
-		errorChSize: defaultErrorChannelSize,
-		codec:       gob.Codec,
+		publishChSize:   defaultPublishChannelSize,
+		deliveredChSize: defaultDeliveredChannelSize,
+		errorChSize:     defaultErrorChannelSize,
+		codec:           gob.Codec,
 	}
 }
 
@@ -37,6 +45,20 @@ func (f optionFunc) apply(opts *options) {
 func WithCodec(codec types.Codec) Option {
 	return optionFunc(func(opts *options) {
 		opts.codec = codec
+	})
+}
+
+// PublishChannelSize sets the size of a channel that contains messages that will be sent later.
+func PublishChannelSize(size int) Option {
+	return optionFunc(func(opts *options) {
+		opts.publishChSize = size
+	})
+}
+
+// DeliveredChannelSize sets the size of a channel that contains messages that are sent by the backend and about to be delivered.
+func DeliveredChannelSize(size int) Option {
+	return optionFunc(func(opts *options) {
+		opts.deliveredChSize = size
 	})
 }
 
