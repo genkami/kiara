@@ -18,12 +18,13 @@ type Pipe struct {
 	Publish <-chan *Message
 
 	// Delivered is a messages that are sent from backend message brokers.
-	// When messages are sent from Adapter's backend message brokers, Adapters must sent them to this channel.
+	// When messages are sent from Adapter's backend message brokers, Adapters must send them to this channel.
 	// When sending to this channel blocks, Adapters should not wait, discard succeeding messages, and send
 	// errors to Errors channel to indicate that messages are dropped.
 	Delivered chan<- *Message
 
 	// Errors are asynchronous erros that occurred in Adapters.
+	// When sending to this channel blocks, Adapters should not wait and discard succeeding errors.
 	Errors chan<- error
 }
 
