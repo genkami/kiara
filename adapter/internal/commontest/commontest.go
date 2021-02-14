@@ -39,25 +39,39 @@ func AssertAdapterIsImplementedCorrectly(env AdapterEnv) {
 		env.Teardown()
 	})
 
+	newPipe := func() (chan *types.Message, chan *types.Message, chan error, *types.Pipe) {
+		publish := make(chan *types.Message, 10)
+		delivered := make(chan *types.Message, 10)
+		errors := make(chan error, 10)
+		pipe := &types.Pipe{
+			Publish:   publish,
+			Delivered: delivered,
+			Errors:    errors,
+		}
+		return publish, delivered, errors, pipe
+	}
+
 	Describe("Publish", func() {
 		Context("when the adapter itself is subscribing to the topic", func() {
 			It("sends a message", func() {
+				publish, delivered, errors, pipe := newPipe()
 				adapter := env.NewAdapter()
-				defer adapter.Close()
+				adapter.Start(pipe)
+				defer adapter.Stop()
 				topic := "kfpemployees"
 				err := adapter.Subscribe(topic)
 				Expect(err).NotTo(HaveOccurred())
 				payload := []byte("kikkeriki~~~")
-				adapter.Publish() <- &types.Message{Topic: topic, Payload: payload}
+				publish <- &types.Message{Topic: topic, Payload: payload}
 				select {
 				case <-time.After(timeoutExpectedNotToExceed):
 					select {
-					case err := <-adapter.Errors():
+					case err := <-errors:
 						Expect(err).NotTo(HaveOccurred())
 					default:
 						Fail("message disappeared")
 					}
-				case msg := <-adapter.Delivered():
+				case msg := <-delivered:
 					Expect(msg).To(Equal(&types.Message{Topic: topic, Payload: payload}))
 				}
 			})
@@ -65,14 +79,16 @@ func AssertAdapterIsImplementedCorrectly(env AdapterEnv) {
 
 		Context("when the adapter is not subscribing to the topic", func() {
 			It("does not send a message", func() {
+				publish, delivered, _, pipe := newPipe()
 				adapter := env.NewAdapter()
-				defer adapter.Close()
+				adapter.Start(pipe)
+				defer adapter.Stop()
 				topic := "kfpemployees"
 				payload := []byte("kikkeriki~~~")
-				adapter.Publish() <- &types.Message{Topic: topic, Payload: payload}
+				publish <- &types.Message{Topic: topic, Payload: payload}
 				select {
 				case <-time.After(timeoutExpectedToExceed):
-				case <-adapter.Delivered():
+				case <-delivered:
 					Fail("unexpected message arrived")
 				}
 			})
@@ -80,24 +96,30 @@ func AssertAdapterIsImplementedCorrectly(env AdapterEnv) {
 
 		Context("when another adapter is subscribing to the topic", func() {
 			It("sends a message", func() {
+				publish, _, _, pubPipe := newPipe()
 				pub := env.NewAdapter()
-				defer pub.Close()
+				pub.Start(pubPipe)
+				defer pub.Stop()
+
+				_, delivered, errors, subPipe := newPipe()
 				sub := env.NewAdapter()
-				defer sub.Close()
+				sub.Start(subPipe)
+				defer sub.Stop()
+
 				topic := "kfpemployees"
 				err := sub.Subscribe(topic)
 				Expect(err).NotTo(HaveOccurred())
 				payload := []byte("kikkeriki~~~")
-				pub.Publish() <- &types.Message{Topic: topic, Payload: payload}
+				publish <- &types.Message{Topic: topic, Payload: payload}
 				select {
 				case <-time.After(timeoutExpectedNotToExceed):
 					select {
-					case err := <-sub.Errors():
+					case err := <-errors:
 						Expect(err).NotTo(HaveOccurred())
 					default:
 						Fail("message disappeared")
 					}
-				case msg := <-sub.Delivered():
+				case msg := <-delivered:
 					Expect(msg).To(Equal(&types.Message{Topic: topic, Payload: payload}))
 				}
 			})
@@ -105,32 +127,40 @@ func AssertAdapterIsImplementedCorrectly(env AdapterEnv) {
 
 		Context("when more than one adapters are subscribing to the topic", func() {
 			It("sends a message to all the adapters", func() {
+				publish, _, _, pubPipe := newPipe()
 				pub := env.NewAdapter()
-				defer pub.Close()
+				pub.Start(pubPipe)
+				defer pub.Stop()
 				topic := "kfpemployees"
 
 				size := 3
-				subs := make([]types.Adapter, 0, size)
+				deliveredList := make([]chan *types.Message, 0, size)
+				errorsList := make([]chan error, 0, size)
 				for i := 0; i < size; i++ {
+					_, delivered, errors, pipe := newPipe()
 					sub := env.NewAdapter()
+					sub.Start(pipe)
+					defer sub.Stop()
 					err := sub.Subscribe(topic)
 					Expect(err).NotTo(HaveOccurred())
-					defer sub.Close()
-					subs = append(subs, sub)
+
+					deliveredList = append(deliveredList, delivered)
+					errorsList = append(errorsList, errors)
 				}
 
 				payload := []byte("kikkeriki~~~")
-				pub.Publish() <- &types.Message{Topic: topic, Payload: payload}
-				for _, sub := range subs {
+				publish <- &types.Message{Topic: topic, Payload: payload}
+				for i, delivered := range deliveredList {
+					errors := errorsList[i]
 					select {
 					case <-time.After(timeoutExpectedNotToExceed):
 						select {
-						case err := <-sub.Errors():
+						case err := <-errors:
 							Expect(err).NotTo(HaveOccurred())
 						default:
 							Fail("message disappeared")
 						}
-					case msg := <-sub.Delivered():
+					case msg := <-delivered:
 						Expect(msg).To(Equal(&types.Message{Topic: topic, Payload: payload}))
 					}
 				}

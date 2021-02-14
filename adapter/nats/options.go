@@ -4,30 +4,18 @@ import (
 	"time"
 )
 
-const (
-	defaultPublishChannelSize   = 100
-	defaultDeliveredChannelSize = 100
-	defaultErrorChannelSize     = 100
-)
-
 var (
 	defaultFlushInterval = 1 * time.Second
 )
 
 // options is a configuration of Adapter.
 type options struct {
-	publishChSize   int
-	deliveredChSize int
-	errorChSize     int
-	flushInterval   time.Duration
+	flushInterval time.Duration
 }
 
 func defaultOptions() options {
 	return options{
-		publishChSize:   defaultPublishChannelSize,
-		deliveredChSize: defaultDeliveredChannelSize,
-		errorChSize:     defaultErrorChannelSize,
-		flushInterval:   defaultFlushInterval,
+		flushInterval: defaultFlushInterval,
 	}
 }
 
@@ -40,27 +28,6 @@ type optionFunc func(*options)
 
 func (f optionFunc) apply(opts *options) {
 	f(opts)
-}
-
-// PublishChannelSize sets the size of a channel that contains messages that will be sent later.
-func PublishChannelSize(size int) Option {
-	return optionFunc(func(opts *options) {
-		opts.publishChSize = size
-	})
-}
-
-// DeliveredChannelSize sets the size of a channel that contains messages that are sent by the backend and about to be delivered.
-func DeliveredChannelSize(size int) Option {
-	return optionFunc(func(opts *options) {
-		opts.deliveredChSize = size
-	})
-}
-
-// ErrorChannelSize sets the size of a channel through which errors are reported.
-func ErrorChannelSize(size int) Option {
-	return optionFunc(func(opts *options) {
-		opts.errorChSize = size
-	})
 }
 
 // FlushInterval sets the interval for flushing.

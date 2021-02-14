@@ -22,29 +22,43 @@ var (
 
 // PubSub provides a way to send and receive arbitrary data.
 type PubSub struct {
-	adapter types.Adapter
-	opts    options
-	errorCh chan error
-	done    chan struct{}
-	doneWg  sync.WaitGroup
-	state   pubSubState
+	adapter     types.Adapter
+	opts        options
+	publishCh   chan *types.Message
+	deliveredCh chan *types.Message
+	errorCh     chan error
+	done        chan struct{}
+	doneWg      sync.WaitGroup
+	state       pubSubState
 }
 
-// NewPubSub creates a new PubSub.
+// NewPubSub creates a new PubSub and starts its underlying adapter.
 func NewPubSub(adapter types.Adapter, options ...Option) *PubSub {
 	opts := defaultOptions()
 	for _, o := range options {
 		o.apply(&opts)
 	}
+	// TODO: configure
+	publishCh := make(chan *types.Message, 100)
+	deliveredCh := make(chan *types.Message, 100)
+	errorCh := make(chan error, opts.errorChSize)
+	pipe := &types.Pipe{
+		Publish:   publishCh,
+		Delivered: deliveredCh,
+		Errors:    errorCh,
+	}
 	p := &PubSub{
-		adapter: adapter,
-		opts:    opts,
-		errorCh: make(chan error, opts.errorChSize),
-		done:    make(chan struct{}),
+		adapter:     adapter,
+		opts:        opts,
+		publishCh:   publishCh,
+		deliveredCh: deliveredCh,
+		errorCh:     errorCh,
+		done:        make(chan struct{}),
 		state: pubSubState{
 			subs: map[string]subscriptionSet{},
 		},
 	}
+	adapter.Start(pipe)
 	p.doneWg.Add(1)
 	go p.run()
 	return p
@@ -56,24 +70,18 @@ func (p *PubSub) run() {
 		select {
 		case <-p.done:
 			return
-		case msg := <-p.adapter.Delivered():
+		case msg := <-p.deliveredCh:
 			p.deliver(msg)
-		case err := <-p.adapter.Errors():
-			select {
-			case p.errorCh <- err:
-			default:
-				// discard
-			}
 		}
 	}
 }
 
 // Close stops the PubSub and releases its resources.
-// It also closes its underlying adapter so we don't need closing adapters manually.
+// It also stop its underlying adapter so we don't need stopping adapters manually.
 func (p *PubSub) Close() {
 	close(p.done)
 	p.doneWg.Wait()
-	p.adapter.Close()
+	p.adapter.Stop()
 }
 
 // deliver delivers a message to all channels that are subscribing to a message's topic.
@@ -147,7 +155,7 @@ func (p *PubSub) Publish(ctx context.Context, topic string, data interface{}) er
 	}
 	msg := &types.Message{Topic: topic, Payload: payload}
 	select {
-	case p.adapter.Publish() <- msg:
+	case p.publishCh <- msg:
 	case <-ctx.Done():
 		return ErrCancelled
 	}

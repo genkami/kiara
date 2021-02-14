@@ -11,16 +11,26 @@ type Message struct {
 	Payload []byte
 }
 
+// Pipe is a pipeline through which kiara.PubSub communicates with Adapters.
+type Pipe struct {
+	// Publish is a messages that are about to be published.
+	// Adapters must watch this channel and send messages from this channel to backend message brokers.
+	Publish <-chan *Message
+
+	// Delivered is a messages that are sent from backend message brokers.
+	// When messages are sent from Adapter's backend message brokers, Adapters must sent them to this channel.
+	// When sending to this channel blocks, Adapters should not wait, discard succeeding messages, and send
+	// errors to Errors channel to indicate that messages are dropped.
+	Delivered chan<- *Message
+
+	// Errors are asynchronous erros that occurred in Adapters.
+	Errors chan<- error
+}
+
 // Adapter is an abstract interface to send and receive Messsages.
 type Adapter interface {
-	// Publish returns a channel through which messages are published.
-	Publish() chan<- *Message
-
-	// Delivered returns a channel through which messages are delivered.
-	Delivered() <-chan *Message
-
-	// Errors returns a channel through which asyncronous errors are reported.
-	Errors() <-chan error
+	// Start starts communicating with `kiara.PubSub` through the given Pipe.
+	Start(*Pipe)
 
 	// Subscribe subscribes a topic.
 	// It may return an error when the topic is already subscribed.
@@ -29,8 +39,8 @@ type Adapter interface {
 	// Unsubscribe unsubscribes a topic.
 	Unsubscribe(topic string) error
 
-	// Close stops the adapter and releases resources that an adapter has.
-	Close()
+	// Stop stops the adapter and releases resources that an adapter has.
+	Stop()
 }
 
 // Codec converts an arbitrary object into a byte slice.

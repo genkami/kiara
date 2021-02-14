@@ -30,10 +30,7 @@ var (
 type Adapter struct {
 	conn              *nats.Conn
 	receivedNatsMsgCh chan *nats.Msg
-
-	publishCh   chan *types.Message
-	deliveredCh chan *types.Message
-	errorCh     chan error
+	pipe              *types.Pipe
 
 	done   chan struct{}
 	doneWg sync.WaitGroup
@@ -54,18 +51,19 @@ func NewAdapter(conn *nats.Conn, options ...Option) *Adapter {
 	a := &Adapter{
 		conn:              conn,
 		receivedNatsMsgCh: make(chan *nats.Msg, receivedNatsMsgChSize),
-		publishCh:         make(chan *types.Message, opts.publishChSize),
-		deliveredCh:       make(chan *types.Message, opts.deliveredChSize),
-		errorCh:           make(chan error, opts.errorChSize),
 		done:              make(chan struct{}),
 		opts:              opts,
 		subs:              map[string]*nats.Subscription{},
 	}
-	conn.SetErrorHandler(a.natsErrorHandler())
-	conn.SetDisconnectErrHandler(a.natsConnErrorHandler())
+	return a
+}
+
+func (a *Adapter) Start(pipe *types.Pipe) {
+	a.pipe = pipe
+	a.conn.SetErrorHandler(a.natsErrorHandler())
+	a.conn.SetDisconnectErrHandler(a.natsConnErrorHandler())
 	a.doneWg.Add(1)
 	go a.run()
-	return a
 }
 
 func (a *Adapter) run() {
@@ -77,11 +75,11 @@ func (a *Adapter) run() {
 		select {
 		case <-a.done:
 			return
-		case msg := <-a.publishCh:
+		case msg := <-a.pipe.Publish:
 			err := a.conn.Publish(msg.Topic, msg.Payload)
 			if err != nil {
 				select {
-				case a.errorCh <- err:
+				case a.pipe.Errors <- err:
 				default:
 					// discard
 				}
@@ -89,10 +87,10 @@ func (a *Adapter) run() {
 		case natsMsg := <-a.receivedNatsMsgCh:
 			msg := &types.Message{Topic: natsMsg.Subject, Payload: natsMsg.Data}
 			select {
-			case a.deliveredCh <- msg:
+			case a.pipe.Delivered <- msg:
 			default:
 				select {
-				case a.errorCh <- ErrSlowConsumer:
+				case a.pipe.Errors <- ErrSlowConsumer:
 				default:
 					// discard
 				}
@@ -101,25 +99,13 @@ func (a *Adapter) run() {
 			err := a.conn.Flush()
 			if err != nil {
 				select {
-				case a.errorCh <- err:
+				case a.pipe.Errors <- err:
 				default:
 					// discard
 				}
 			}
 		}
 	}
-}
-
-func (a *Adapter) Publish() chan<- *types.Message {
-	return a.publishCh
-}
-
-func (a *Adapter) Delivered() <-chan *types.Message {
-	return a.deliveredCh
-}
-
-func (a *Adapter) Errors() <-chan error {
-	return a.errorCh
 }
 
 func (a *Adapter) Subscribe(topic string) error {
@@ -137,7 +123,7 @@ func (a *Adapter) Subscribe(topic string) error {
 	err = a.conn.Flush()
 	if err != nil {
 		select {
-		case a.errorCh <- err:
+		case a.pipe.Errors <- err:
 		default:
 			// discard
 		}
@@ -158,8 +144,7 @@ func (a *Adapter) Unsubscribe(topic string) error {
 	return nil
 }
 
-// Close closes an adapter and its underlying NATS connection.
-func (a *Adapter) Close() {
+func (a *Adapter) Stop() {
 	close(a.done)
 	a.doneWg.Wait()
 	a.conn.Close()
@@ -168,7 +153,7 @@ func (a *Adapter) Close() {
 func (a *Adapter) natsErrorHandler() nats.ErrHandler {
 	return func(_ *nats.Conn, _ *nats.Subscription, err error) {
 		select {
-		case a.errorCh <- err:
+		case a.pipe.Errors <- err:
 		default:
 			// discard
 		}
@@ -178,7 +163,7 @@ func (a *Adapter) natsErrorHandler() nats.ErrHandler {
 func (a *Adapter) natsConnErrorHandler() nats.ConnErrHandler {
 	return func(_ *nats.Conn, err error) {
 		select {
-		case a.errorCh <- err:
+		case a.pipe.Errors <- err:
 		default:
 			// discard
 		}

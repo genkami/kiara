@@ -119,15 +119,13 @@ func (set adapterSet) ForEach(fn func(*Adapter)) {
 
 // Adapter is an adapter that sends messages through Broker.
 type Adapter struct {
-	broker    *Broker
-	subLock   sync.RWMutex
-	topics    topicSet
-	publish   chan *types.Message
-	noticed   chan *types.Message
-	delivered chan *types.Message
-	errors    <-chan error
-	done      chan struct{}
-	opts      adapterOptions
+	broker  *Broker
+	subLock sync.RWMutex
+	topics  topicSet
+	pipe    *types.Pipe
+	noticed chan *types.Message
+	done    chan struct{}
+	opts    adapterOptions
 }
 
 var _ types.Adapter = &Adapter{}
@@ -135,18 +133,19 @@ var _ types.Adapter = &Adapter{}
 func NewAdapter(broker *Broker) *Adapter {
 	opts := defaultAdapterOptions()
 	a := &Adapter{
-		broker:    broker,
-		topics:    newTopicSet(),
-		publish:   make(chan *types.Message, opts.publishChSize),
-		noticed:   make(chan *types.Message, opts.noticedChSize),
-		delivered: make(chan *types.Message, opts.deliveredChSize),
-		errors:    make(chan error), // currently errors are never delivered
-		done:      make(chan struct{}),
-		opts:      opts,
+		broker:  broker,
+		topics:  newTopicSet(),
+		noticed: make(chan *types.Message, opts.noticedChSize),
+		done:    make(chan struct{}),
+		opts:    opts,
 	}
-	broker.registerAdapter(a)
-	go a.run()
 	return a
+}
+
+func (a *Adapter) Start(pipe *types.Pipe) {
+	a.pipe = pipe
+	a.broker.registerAdapter(a)
+	go a.run()
 }
 
 func (a *Adapter) run() {
@@ -156,7 +155,7 @@ func (a *Adapter) run() {
 			return
 		case msg := <-a.noticed:
 			a.deliver(msg)
-		case msg := <-a.publish:
+		case msg := <-a.pipe.Publish:
 			a.broker.messages <- msg
 		}
 	}
@@ -166,22 +165,10 @@ func (a *Adapter) deliver(msg *types.Message) {
 	a.subLock.RLock()
 	if a.topics.Has(msg.Topic) {
 		a.subLock.RUnlock()
-		a.delivered <- msg
+		a.pipe.Delivered <- msg
 	} else {
 		a.subLock.RUnlock()
 	}
-}
-
-func (a *Adapter) Publish() chan<- *types.Message {
-	return a.publish
-}
-
-func (a *Adapter) Delivered() <-chan *types.Message {
-	return a.delivered
-}
-
-func (a *Adapter) Errors() <-chan error {
-	return a.errors
 }
 
 func (a *Adapter) Subscribe(topic string) error {
@@ -204,24 +191,20 @@ func (a *Adapter) Unsubscribe(topic string) error {
 	return nil
 }
 
-func (a *Adapter) Close() {
+func (a *Adapter) Stop() {
 	a.broker.unregisterAdapter(a)
 	close(a.done)
 }
 
 // adapterOptions is a configuration of Adapter.
 type adapterOptions struct {
-	publishChSize   int
-	deliveredChSize int
-	noticedChSize   int
+	noticedChSize int
 }
 
 // Currently we do not provide any methods to configure these parameters because no one wants to do this.
 func defaultAdapterOptions() adapterOptions {
 	return adapterOptions{
-		publishChSize:   10,
-		deliveredChSize: 10,
-		noticedChSize:   10,
+		noticedChSize: 10,
 	}
 }
 
