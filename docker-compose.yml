@@ -1,7 +1,7 @@
 version: '3'
 services:
   redis:
-    image: "redis:6.0.10-alpine3.13"
+    image: "redis:6.2.0-alpine3.13"
     ports:
       - "6379:6379"
   nats:
