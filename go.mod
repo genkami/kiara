@@ -10,6 +10,6 @@ require (
 	github.com/nats-io/nats.go v1.10.0
 	github.com/onsi/ginkgo v1.15.1
 	github.com/onsi/gomega v1.11.0
-	github.com/vmihailenco/msgpack/v5 v5.2.0
+	github.com/vmihailenco/msgpack/v5 v5.2.3
 	google.golang.org/protobuf v1.25.0
 )
