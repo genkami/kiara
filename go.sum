@@ -26,6 +26,8 @@ github.com/go-redis/redis/v8 v8.7.1 h1:8IYi6RO83fNcG5amcUUYTN/qH2h4OjZHlim3KWGFS
 github.com/go-redis/redis/v8 v8.7.1/go.mod h1:BRxHBWn3pO3CfjyX6vAoyeRmCquvxr6QG+2onGV2gYs=
 github.com/go-redis/redis/v8 v8.8.0 h1:fDZP58UN/1RD3DjtTXP/fFZ04TFohSYhjZDkcDe2dnw=
 github.com/go-redis/redis/v8 v8.8.0/go.mod h1:F7resOH5Kdug49Otu24RjHWwgK7u9AmtqWMnCV1iP5Y=
+github.com/go-redis/redis/v8 v8.8.2 h1:O/NcHqobw7SEptA0yA6up6spZVFtwE06SXM8rgLtsP8=
+github.com/go-redis/redis/v8 v8.8.2/go.mod h1:F7resOH5Kdug49Otu24RjHWwgK7u9AmtqWMnCV1iP5Y=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b/go.mod h1:SBH7ygxi8pfUlaOkMMuAQtPIUF8ecWP5IEl/CR7VP2Q=
 github.com/golang/mock v1.1.1/go.mod h1:oTYuIxOrZwtPieC+H1uAHpcLFnEyAGVDL/k47Jfbm0A=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
