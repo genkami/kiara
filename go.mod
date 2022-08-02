@@ -1,6 +1,6 @@
 module github.com/genkami/kiara
 
-go 1.15
+go 1.19
 
 require (
 	github.com/genkami/watson v1.0.0
