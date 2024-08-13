@@ -7,7 +7,7 @@ require (
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang/protobuf v1.5.3
 	github.com/gorilla/websocket v1.5.0
-	github.com/nats-io/nats.go v1.16.0
+	github.com/nats-io/nats.go v1.37.0
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.18.1
 	github.com/vmihailenco/msgpack/v5 v5.3.5
