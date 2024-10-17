@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/genkami/watson v1.0.0
-	github.com/go-redis/redis/v8 v8.11.5
+	github.com/go-redis/redis/v9 v9.7.0
 	github.com/golang/protobuf v1.5.3
 	github.com/gorilla/websocket v1.5.0
 	github.com/nats-io/nats.go v1.16.0
